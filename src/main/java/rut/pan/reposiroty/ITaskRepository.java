@@ -10,11 +10,7 @@ import java.util.List;
 @Repository
 public interface ITaskRepository extends JpaRepository<Task, Long> {
 
-    default List<Task> getAllTasksByEmployerId(Integer employerId) {
-        //todo
-        return null;
-    };
-
+    List<Task> getAllTasksByEmployerId(Integer employerId);
 
 
 }

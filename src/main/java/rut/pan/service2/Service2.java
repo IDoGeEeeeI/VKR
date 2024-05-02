@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import rut.pan.entity.UserDto;
 import rut.pan.security.SecurityService;
 import rut.pan.service.EmployerService;
 import rut.pan.service.TaskService;
@@ -42,6 +43,10 @@ public class Service2 {
 
     public boolean isUserLoggedIn() {
         return securityService.isUserLoggedIn();
+    }
+
+    public UserDto getUserByLogin(String login) {
+        return securityService.getUserByLogin(login);
     }
 
     public String test() {

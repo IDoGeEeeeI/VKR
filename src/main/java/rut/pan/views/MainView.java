@@ -13,7 +13,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.component.button.Button;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import rut.pan.service2.Service2;
 
 @Slf4j
@@ -21,13 +20,9 @@ import rut.pan.service2.Service2;
 @Route("")
 class MainView extends VerticalLayout implements BeforeEnterObserver {
 
-    @Autowired
-    private Service2 service2;
-
-
     @Override
     public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
-        if (!service2.isUserLoggedIn()) {
+        if (!Service2.getInstance().isUserLoggedIn()) {
             beforeEnterEvent.rerouteTo(LoginView.class);
         }
     }
