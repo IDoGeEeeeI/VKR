@@ -5,8 +5,8 @@ import com.vaadin.flow.theme.Theme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+@Theme("v1")
 @SpringBootApplication
-//@Theme(value = "mytodo")
 public class PanApplication implements AppShellConfigurator {
 
 	public static void main(String[] args) {
