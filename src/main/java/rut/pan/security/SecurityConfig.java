@@ -32,8 +32,9 @@ public class SecurityConfig extends VaadinWebSecurity {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
-            UserDto dbUser = Service2.getInstance().getUserByLogin(username);
+            UserDto dbUser = Service2.getInstance().getSecurityService().getUserByLogin(username);
             if (dbUser != null) {
+                //todo кастомный энкодер
                 return User.builder()
                         .username(dbUser.getLogin())
                         .password(dbUser.getPassword())

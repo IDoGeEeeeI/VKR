@@ -1,15 +1,16 @@
 package rut.pan.service2;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import rut.pan.entity.UserDto;
 import rut.pan.security.SecurityService;
 import rut.pan.service.EmployerService;
 import rut.pan.service.TaskService;
 
 
+@Getter
 @Component
 public class Service2 {
 
@@ -41,19 +42,5 @@ public class Service2 {
     @Autowired
     private EmployerService employerService;
 
-    public boolean isUserLoggedIn() {
-        return securityService.isUserLoggedIn();
-    }
-
-    public UserDto getUserByLogin(String login) {
-        return securityService.getUserByLogin(login);
-    }
-
-    public String test() {
-        return "" + taskService.list();
-    }
-
-
-    //todo буду юзать его для взаимодействи на веб слое, так что логику не расписываю в сервисах, а тут буду получать одно, используя другое
 
 }

@@ -28,11 +28,17 @@
 
 }
 
+.avatar {
+    padding: 6px;
+}
+
 .user-text {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 140px;
+    height: 36px;
+    padding: 10px;
 }
 
 .filter-layout {

@@ -21,9 +21,6 @@ public class SecurityService {
 
     private final AuthenticationContext authenticationContext;
 
-//    public SecurityService(AuthenticationContext authenticationContext) {
-//        this.authenticationContext = authenticationContext;
-//    }
     public SecurityService(PasswordEncoder passwordEncoder, AuthenticationContext authenticationContext) {
         this.passwordEncoder = passwordEncoder;
         this.authenticationContext = authenticationContext;

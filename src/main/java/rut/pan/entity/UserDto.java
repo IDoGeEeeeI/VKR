@@ -31,4 +31,11 @@ public class UserDto implements Serializable {
     @ManyToOne
     private Roles role;
 
+    private String name;
+
+    private String caption;
+
+    private String email;
+
+
 }
