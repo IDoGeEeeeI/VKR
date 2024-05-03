@@ -18,6 +18,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import rut.pan.entity.Employer;
 import rut.pan.entity.Roles;
+import rut.pan.entity.UserDto;
 import rut.pan.service2.Service2;
 
 //todo сделать общую гриду и потом и в задачах использовать
@@ -33,7 +34,7 @@ public class GridContent extends Grid<Employer> {
         editor.setBinder(binder);
         editor.setBuffered(true);
 
-//        addEditableColumns(binder);
+        addEditableColumns(binder);
 
         addColumn(new ComponentRenderer<>(employer -> {
             HorizontalLayout layout = new HorizontalLayout();
@@ -72,47 +73,54 @@ public class GridContent extends Grid<Employer> {
         addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
     }
 
-//    private void addEditableColumns(Binder<Employer> binder) {
-//        TextField nameField = new TextField();
-//        ComboBox<Roles> rolesComboBox = new ComboBox<>();
-//        TextField emailField = new TextField();
-//        TextField captionField = new TextField();
-//
-//        this.addColumn(createAvatarRenderer())
-//                .setAutoWidth(true)
-//                .setFlexGrow(0)
-//                .setResizable(true);
-//        this.addColumn(Employer::getName)
-//                .setHeader("Имя")
-//                .setEditorComponent(nameField)
-//                .setResizable(true);
-//        binder.bind(nameField, Employer::getName, Employer::setName);
-//
-//        rolesComboBox.setItemLabelGenerator(Roles::getRoleName);
-//        rolesComboBox.setItems(Service2.getInstance().getRolesService().list());
-//        this.addColumn(employer -> employer.getRoles() == null ? "" : employer.getRoles().getRoleName())
-//                .setHeader("Должность")
-//                .setEditorComponent(rolesComboBox)
-//                .setResizable(true)
-//                .setSortable(true);
-//        binder.bind(rolesComboBox, Employer::getRoles, Employer::setRoles);
-//
-//        this.addColumn(Employer::getEmail)
-//                .setHeader("Email")
-//                .setEditorComponent(emailField)
-//                .setResizable(true);
-//        binder.bind(emailField, Employer::getEmail, Employer::setEmail);
-//
-//        this.addColumn(Employer::getCaption)
-//                .setHeader("Комментарий")
-//                .setEditorComponent(captionField)
-//                .setResizable(true);
-//        binder.bind(captionField, Employer::getCaption, Employer::setCaption);
-//
-//    }
+    private void addEditableColumns(Binder<Employer> binder) {
+        TextField nameField = new TextField();
+        ComboBox<Roles> rolesComboBox = new ComboBox<>();
+        TextField emailField = new TextField();
+        TextField captionField = new TextField();
 
-    public void addNewEmployer() {
-        Employer newEmployer = new Employer();
+        this.addColumn(createAvatarRenderer())
+                .setAutoWidth(true)
+                .setFlexGrow(0)
+                .setResizable(true);
+        this.addColumn(Employer::getName)
+                .setHeader("Имя")
+                .setEditorComponent(nameField)
+                .setResizable(true);
+        binder.bind(nameField, Employer::getName, Employer::setName);
+
+        rolesComboBox.setItemLabelGenerator(Roles::getRoleName);
+        rolesComboBox.setItems(Service2.getInstance().getRolesService().list());
+        this.addColumn(employer -> employer.getUser().getRole() == null ? "" : employer.getUser().getRole().getRoleName())
+                .setHeader("Должность")
+                .setEditorComponent(rolesComboBox)
+                .setResizable(true)
+                .setSortable(true);
+        binder.forField(rolesComboBox)
+                .bind(employer -> {
+                    UserDto user = employer.getUser();
+                    return user != null ? user.getRole() : null;
+                }, (employer, role) -> {
+                    UserDto user = employer.getUser();
+                    if (user == null) {
+                        user = new UserDto();
+                        employer.setUser(user);
+                    }
+                    user.setRole(role);
+                });
+
+
+        this.addColumn(Employer::getEmail)
+                .setHeader("Email")
+                .setEditorComponent(emailField)
+                .setResizable(true);
+        binder.bind(emailField, Employer::getEmail, Employer::setEmail);
+
+        this.addColumn(Employer::getCaption)
+                .setHeader("Комментарий")
+                .setEditorComponent(captionField)
+                .setResizable(true);
+        binder.bind(captionField, Employer::getCaption, Employer::setCaption);
 
     }
 

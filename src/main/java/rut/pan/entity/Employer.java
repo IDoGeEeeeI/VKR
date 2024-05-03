@@ -22,5 +22,8 @@ public class Employer {
 
     private String email;
 
+    @OneToOne
+    private UserDto user;
+
 
 }

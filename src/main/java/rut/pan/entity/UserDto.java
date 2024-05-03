@@ -25,9 +25,6 @@ public class UserDto implements Serializable {
 
     private String password;
 
-    @OneToOne
-    private Employer employer;
-
     @ManyToOne
     private Roles role;
 

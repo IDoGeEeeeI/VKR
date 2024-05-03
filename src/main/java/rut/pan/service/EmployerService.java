@@ -2,9 +2,8 @@ package rut.pan.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import rut.pan.entity.Employer;
-import rut.pan.entity.Roles;
+import rut.pan.entity.UserDto;
 import rut.pan.reposiroty.IEmployerRepository;
 
 import java.util.List;
@@ -17,6 +16,10 @@ public class EmployerService {
 
     public List<Employer> list() {
         return iEmployerRepository.findAll();
+    }
+
+    public Employer getEmployerByUser(UserDto user) {
+        return iEmployerRepository.findEmployerByUser(user);
     }
 
     public void remove(final Employer employer) {

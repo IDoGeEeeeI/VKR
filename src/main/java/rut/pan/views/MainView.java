@@ -250,7 +250,9 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
     private void getUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
-            user = Service2.getInstance().getSecurityService().getUserByLogin(authentication.getName()).getEmployer();
+            user = Service2.getInstance().getEmployerService().getEmployerByUser(
+                    Service2.getInstance().getSecurityService().getUserByLogin(authentication.getName())//кринж
+            );
         }
     }
 
