@@ -26,7 +26,6 @@ public class SecurityService {
         this.authenticationContext = authenticationContext;
     }
 
-    //todo для дальнейшего создания пользователей внутри(админами)
     public UserDto createUser(String login, String rawPassword, Roles role) {
         UserDto existingUser = iUserRepository.findByLogin(login);
         if (existingUser != null) {

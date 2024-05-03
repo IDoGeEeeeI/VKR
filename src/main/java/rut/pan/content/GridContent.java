@@ -65,7 +65,7 @@ public class GridContent extends Grid<Employer> {
         })).setFooter("Всего записей: " + collEmp());
 
         getEditor().addSaveListener(e -> {
-            Service2.getInstance().getEmployerService().editEmployer(e.getItem());
+            Service2.getInstance().saveNewEmployer(e.getItem());
             getListDataView().refreshAll();
             getDataProvider().refreshAll();
         });
@@ -78,11 +78,48 @@ public class GridContent extends Grid<Employer> {
         ComboBox<Roles> rolesComboBox = new ComboBox<>();
         TextField emailField = new TextField();
         TextField captionField = new TextField();
+        TextField loginField = new TextField();
+        TextField passwordField = new TextField();
 
         this.addColumn(createAvatarRenderer())
                 .setAutoWidth(true)
                 .setFlexGrow(0)
                 .setResizable(true);
+
+        this.addColumn(employer -> employer.getUser() == null ? "" : employer.getUser().getLogin())
+                .setHeader("Login")
+                .setEditorComponent(loginField)
+                .setResizable(true);
+        binder.forField(loginField)
+                .bind(employer -> {
+                    UserDto user = employer.getUser();
+                    return user != null ? user.getLogin() : null;
+                }, (employer, login) -> {
+                    UserDto user = employer.getUser();
+                    if (user == null) {
+                        user = new UserDto();
+                        employer.setUser(user);
+                    }
+                    user.setLogin(login);
+                });
+        //todo
+        this.addColumn(employer -> employer.getUser() == null ? "" : employer.getUser().getPassword())
+                .setHeader("Password")
+                .setEditorComponent(passwordField)
+                .setResizable(true);
+        binder.forField(passwordField)
+                .bind(employer -> {
+                    UserDto user = employer.getUser();
+                    return user != null ? user.getPassword() : null;
+                }, (employer, password) -> {
+                    UserDto user = employer.getUser();
+                    if (user == null) {
+                        user = new UserDto();
+                        employer.setUser(user);
+                    }
+                    user.setPassword(password);
+                });
+
         this.addColumn(Employer::getName)
                 .setHeader("Имя")
                 .setEditorComponent(nameField)
@@ -91,7 +128,7 @@ public class GridContent extends Grid<Employer> {
 
         rolesComboBox.setItemLabelGenerator(Roles::getRoleName);
         rolesComboBox.setItems(Service2.getInstance().getRolesService().list());
-        this.addColumn(employer -> employer.getUser().getRole() == null ? "" : employer.getUser().getRole().getRoleName())
+        this.addColumn(employer -> employer.getUser() == null ? "" : employer.getUser().getRole().getRoleName())
                 .setHeader("Должность")
                 .setEditorComponent(rolesComboBox)
                 .setResizable(true)
@@ -108,7 +145,6 @@ public class GridContent extends Grid<Employer> {
                     }
                     user.setRole(role);
                 });
-
 
         this.addColumn(Employer::getEmail)
                 .setHeader("Email")
