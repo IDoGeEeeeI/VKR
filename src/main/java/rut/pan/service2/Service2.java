@@ -7,6 +7,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import rut.pan.security.SecurityService;
 import rut.pan.service.EmployerService;
+import rut.pan.service.RolesService;
 import rut.pan.service.TaskService;
 
 
@@ -41,6 +42,9 @@ public class Service2 {
 
     @Autowired
     private EmployerService employerService;
+
+    @Autowired
+    private RolesService rolesService;
 
 
 }

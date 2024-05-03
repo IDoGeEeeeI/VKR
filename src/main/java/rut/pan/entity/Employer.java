@@ -1,22 +1,26 @@
 package rut.pan.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class Employer {
 
     @Id
+    @NonNull
     @GeneratedValue
     private Integer id;
 
-    private String employerName;
+    private String name;
+
+    private String caption;
+
+    private String email;
+
 
 }

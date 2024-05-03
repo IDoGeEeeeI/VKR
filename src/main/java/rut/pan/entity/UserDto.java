@@ -1,9 +1,6 @@
 package rut.pan.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,14 +25,11 @@ public class UserDto implements Serializable {
 
     private String password;
 
+    @OneToOne
+    private Employer employer;
+
     @ManyToOne
     private Roles role;
-
-    private String name;
-
-    private String caption;
-
-    private String email;
 
 
 }

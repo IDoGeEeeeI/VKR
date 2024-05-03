@@ -13,6 +13,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
@@ -22,8 +23,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import rut.pan.entity.UserDto;
+import rut.pan.content.GridContent;
+import rut.pan.entity.Employer;
 import rut.pan.service2.Service2;
+
+import java.util.Collection;
 
 @Slf4j
 @PermitAll
@@ -37,7 +41,7 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
         }
     }
 
-    private UserDto user = null;
+    private Employer user = null;
 
     MainView() {
 
@@ -89,10 +93,6 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
 
             dialog.open();
         });
-        //todo для создания пользователей админом
-//        contextMenu.addItem("", e -> {
-//
-//        });
         contextMenu.addItem("Выйти", e -> {
             Dialog dialog = new Dialog();
 
@@ -151,22 +151,67 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
         addFilter.getStyle().set("top", "4px");
         filterLayout.add(addFilter);
 
-
-        VerticalLayout tasks = new VerticalLayout();
+        Div tasks = new Div();
         tasks.addClassName("tasks-layout");
-
-        //блоки задач (авто генерируемые)
-
-
-
-
-
-
 
         workLayout.add(filterLayout);
         workLayout.add(tasks);
 
         //задачи
+        if (true) {
+            Button admin = createButtonWithIcon(VaadinIcon.GROUP, "Подчиненные");
+            sidebar.add(admin);
+        }
+        if (true) {
+            GridContent grid = new GridContent();
+            grid.setWidthFull();
+            grid.setHeightFull();
+            grid.setVisible(false);
+            grid.setEnabled(false);
+            grid.setItems(Service2.getInstance().getEmployerService().list());
+
+            Button add = new Button();
+            add.setPrefixComponent(VaadinIcon.PLUS.create());
+            add.setText("Добавить нового пользователя");
+            add.getStyle().set("left", "8px");
+            add.getStyle().set("top", "4px");
+            add.setVisible(false);
+            add.setEnabled(false);
+            add.addClickListener(e -> {
+                Employer newEmployer = new Employer();
+
+                ListDataProvider<Employer> dataProvider = (ListDataProvider<Employer>) grid.getDataProvider();
+                Collection<Employer> currentItems = dataProvider.getItems();
+
+                currentItems.add(newEmployer);
+                dataProvider.refreshAll();
+            });
+
+            Button admin = createButtonWithIcon(VaadinIcon.USER_STAR, "Админ");
+            admin.addClickListener(e -> {
+                if (grid.isVisible()) {
+                    grid.setVisible(false);
+                    grid.setEnabled(false);
+                    tasks.remove(grid);
+
+                    add.setVisible(false);
+                    add.setEnabled(false);
+                    filterLayout.remove(add);
+                } else {
+                    grid.setVisible(true);
+                    grid.setEnabled(true);
+                    tasks.add(grid);
+
+                    add.setVisible(true);
+                    add.setEnabled(true);
+                    filterLayout.add(add);
+                }
+                tasks.setVisible(tasks.isVisible());
+
+            });
+            sidebar.add(admin);
+        }
+
         projectsButton.addClickListener( e -> {
             //todo
         });
@@ -205,7 +250,7 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
     private void getUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
-            user = Service2.getInstance().getSecurityService().getUserByLogin(authentication.getName());
+            user = Service2.getInstance().getSecurityService().getUserByLogin(authentication.getName()).getEmployer();
         }
     }
 
@@ -213,7 +258,7 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
         Button button = new Button();
 
         Icon iconComponent = icon.create();
-        iconComponent.getStyle().set("minWidth", "50px");
+        iconComponent.getStyle().set("minWidth", "24px");
 
         Span textSpan = new Span(text);
         textSpan.getStyle().set("marginLeft", "10px");
@@ -233,6 +278,8 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
         button.getStyle().set("border", "none");
         button.getStyle().set("box-shadow", "none");
         button.getStyle().set("justify-content", "left");
+//        button.getStyle().set("overflow", "hidden");
+//        button.getStyle().set("text-overflow", "ellipsis");
 
         return button;
     }
