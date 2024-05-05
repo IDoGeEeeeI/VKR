@@ -2,6 +2,7 @@ package rut.pan.reposiroty;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import rut.pan.entity.Employer;
 import rut.pan.entity.Task;
 
 import java.util.List;
@@ -11,6 +12,8 @@ import java.util.List;
 public interface ITaskRepository extends JpaRepository<Task, Long> {
 
     List<Task> getAllTasksByEmployerId(Integer employerId);
+
+    List<Task> findByEmployer(Employer employer);
 
 
 }

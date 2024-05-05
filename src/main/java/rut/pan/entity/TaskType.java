@@ -1,6 +1,5 @@
 package rut.pan.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -14,13 +13,12 @@ import lombok.Setter;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Roles {
+public class TaskType {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @Column(name = "role_name")
-    private String roleName;
+    private String type;
 
 }

@@ -30,4 +30,9 @@ public class Task {
 
     @ManyToOne( optional = false )
     private Employer employer;
+
+    private String description;
+
+    @ManyToOne
+    private TaskType taskType;
 }

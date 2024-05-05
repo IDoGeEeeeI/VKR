@@ -22,6 +22,7 @@
     border: azure;
     width: 192px;
     height: 52px;
+    min-height: 52px;
     background-color: #f0f0f0;
     border-radius: 4px 0 0 0;
     margin: 0 0 10px 0;
@@ -46,6 +47,7 @@
     background-color: #f0f0f0;
     border-radius: 0 4px 0 0;
     height: 52px;
+    min-height: 52px;
 }
 
 .tasks-layout {

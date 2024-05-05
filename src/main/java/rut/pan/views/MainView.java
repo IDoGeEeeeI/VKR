@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import rut.pan.content.CalendarView;
 import rut.pan.content.UsersGridContent;
 import rut.pan.entity.Employer;
 import rut.pan.service2.Service2;
@@ -153,12 +154,15 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
 
         Div tasks = new Div();
         tasks.addClassName("tasks-layout");
+        tasks.setVisible(false);
+        tasks.setEnabled(false);
 
         workLayout.add(filterLayout);
         workLayout.add(tasks);
 
         //задачи
-        if (true) {
+        if ("admin".equals(user.getUser().getRole().getRoleName())
+                || "manager".equals(user.getUser().getRole().getRoleName())) {
             Button admin = createButtonWithIcon(VaadinIcon.GROUP, "Подчиненные");
             sidebar.add(admin);
         }
@@ -166,8 +170,6 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
             UsersGridContent grid = new UsersGridContent();
             grid.setWidthFull();
             grid.setHeightFull();
-            grid.setVisible(false);
-            grid.setEnabled(false);
             grid.setItems(Service2.getInstance().getEmployerService().list());
 
             Button add = new Button();
@@ -189,25 +191,14 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
 
             Button admin = createButtonWithIcon(VaadinIcon.USER_STAR, "Админ");
             admin.addClickListener(e -> {
-                if (grid.isVisible()) {
-                    grid.setVisible(false);
-                    grid.setEnabled(false);
-                    tasks.remove(grid);
+                tasks.removeAll();
+                tasks.setVisible(true);
+                tasks.setEnabled(true);
+                tasks.add(grid);
 
-                    add.setVisible(false);
-                    add.setEnabled(false);
-                    filterLayout.remove(add);
-                } else {
-                    grid.setVisible(true);
-                    grid.setEnabled(true);
-                    tasks.add(grid);
-
-                    add.setVisible(true);
-                    add.setEnabled(true);
-                    filterLayout.add(add);
-                }
-                tasks.setVisible(tasks.isVisible());
-
+                add.setVisible(true);
+                add.setEnabled(true);
+                filterLayout.add(add);
             });
             sidebar.add(admin);
         }
@@ -235,6 +226,15 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
         homeButton.addClickListener(e -> {
             div.remove();
             div.setVisible(false);
+        });
+
+        calendarButton.addClickListener(e -> {
+            tasks.removeAll();
+
+            CalendarView calendarView = new CalendarView(user);
+            tasks.add(calendarView);
+            tasks.setVisible(true);
+            tasks.setEnabled(true);
         });
 
 
