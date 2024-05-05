@@ -15,6 +15,7 @@ import java.io.Serializable;
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "user_dto", uniqueConstraints = {@UniqueConstraint(columnNames = {"login"})})
 public class UserDto implements Serializable {
 
     @Id

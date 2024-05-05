@@ -20,6 +20,4 @@ public class Roles {
     @Column(name = "role_name")
     private String roleName;
 
-    private String name;
-
 }

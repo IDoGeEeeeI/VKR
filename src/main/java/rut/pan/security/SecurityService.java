@@ -26,17 +26,23 @@ public class SecurityService {
         this.authenticationContext = authenticationContext;
     }
 
-    public UserDto createUser(String login, String rawPassword, Roles role) {
-        UserDto existingUser = iUserRepository.findByLogin(login);
-        if (existingUser != null) {
-            log.warn("User with login '{}' already exists.", login);
-            return null;
+    public UserDto createOrUpdateUser(String login, String rawPassword, Roles role) {
+        UserDto user = iUserRepository.findByLogin(login);
+        if (user == null) {
+            user = new UserDto();
+            user.setLogin(login);
+        } else {
+            log.info("Обновляем данные существующего пользователя: {}", login);
         }
-        UserDto newUser = new UserDto();
-        newUser.setLogin(login);
-        newUser.setPassword(passwordEncoder.encode(rawPassword));
-        newUser.setRole(role);
-        return iUserRepository.save(newUser);
+
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setRole(role);
+
+        return iUserRepository.save(user);
+    }
+
+    public void deleteUser(UserDto userDto) {
+        iUserRepository.delete(userDto);
     }
 
     public boolean isUserLoggedIn() {

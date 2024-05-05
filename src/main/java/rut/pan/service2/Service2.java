@@ -50,10 +50,17 @@ public class Service2 {
     private RolesService rolesService;
 
     @Transactional
-    public Employer saveNewEmployer(Employer savedEmployer) {
+    public Employer saveOrEditEmployer(Employer savedEmployer) {
         UserDto userDto = savedEmployer.getUser();
-        savedEmployer.setUser(securityService.createUser(userDto.getLogin(), userDto.getPassword(), userDto.getRole()));
+        UserDto updatedOrNewUser = securityService.createOrUpdateUser(userDto.getLogin(), userDto.getPassword(), userDto.getRole());
+        savedEmployer.setUser(updatedOrNewUser);
         return employerService.addEmployer(savedEmployer);
+    }
+
+    @Transactional
+    public void deleteEmployer(Employer employer) {
+        employerService.remove(employer);
+        securityService.deleteUser(employer.getUser());
     }
 
 

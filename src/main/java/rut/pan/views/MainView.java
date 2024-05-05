@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import rut.pan.content.GridContent;
+import rut.pan.content.UsersGridContent;
 import rut.pan.entity.Employer;
 import rut.pan.service2.Service2;
 
@@ -162,8 +162,8 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
             Button admin = createButtonWithIcon(VaadinIcon.GROUP, "Подчиненные");
             sidebar.add(admin);
         }
-        if (true) {
-            GridContent grid = new GridContent();
+        if ("admin".equals(user.getUser().getRole().getRoleName())) {
+            UsersGridContent grid = new UsersGridContent();
             grid.setWidthFull();
             grid.setHeightFull();
             grid.setVisible(false);

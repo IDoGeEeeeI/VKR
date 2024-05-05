@@ -9,6 +9,7 @@ import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -16,15 +17,20 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import org.postgresql.util.PSQLException;
+import org.springframework.core.NestedExceptionUtils;
+import org.springframework.dao.DataIntegrityViolationException;
+import rut.pan.content.dialogs.OkDialog;
 import rut.pan.entity.Employer;
 import rut.pan.entity.Roles;
 import rut.pan.entity.UserDto;
 import rut.pan.service2.Service2;
 
-//todo сделать общую гриду и потом и в задачах использовать
-public class GridContent extends Grid<Employer> {
+import java.util.Collection;
 
-    public GridContent() {
+public class UsersGridContent extends Grid<Employer> {
+
+    public UsersGridContent() {
         super();
         setWidthFull();
         setSelectionMode(SelectionMode.SINGLE);
@@ -41,7 +47,17 @@ public class GridContent extends Grid<Employer> {
 
             Button deleteButton = new Button(new Icon(VaadinIcon.TRASH));
             deleteButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY);
-            deleteButton.addClickListener(e -> this.remove(employer));
+            deleteButton.addClickListener(e -> {
+                if (employer.getId() == null) {
+                    ListDataProvider<Employer> dataProvider = (ListDataProvider<Employer>) this.getDataProvider();
+                    Collection<Employer> currentItems = dataProvider.getItems();
+                    currentItems.remove(employer);
+                    dataProvider.refreshAll();
+                } else {
+                    this.remove(employer);
+                }
+                getListDataView().refreshAll();
+            });
 
             Button editButton = new Button(new Icon(VaadinIcon.PENCIL));
             editButton.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_SUCCESS);
@@ -65,9 +81,40 @@ public class GridContent extends Grid<Employer> {
         })).setFooter("Всего записей: " + collEmp());
 
         getEditor().addSaveListener(e -> {
-            Service2.getInstance().saveNewEmployer(e.getItem());
+            UserDto user = e.getItem().getUser();
+            if (user == null
+                    || (user.getPassword().isEmpty() && user.getLogin().isEmpty() && user.getRole() == null)) {
+                OkDialog okDialog = new OkDialog("Заполните обязательные поля!");
+                okDialog.open();
+            } else {
+                try {
+                    Service2.getInstance().saveOrEditEmployer(e.getItem());
+                } catch (DataIntegrityViolationException ex) {
+                    Throwable rootCause = NestedExceptionUtils.getRootCause(ex);
+                    if (rootCause instanceof PSQLException sqlEx) {
+                        if ("23505".equals(sqlEx.getSQLState())) { //нарушение уникального индекса
+                            OkDialog okDialog = new OkDialog("Запись с таким логином уже существует. Пожалуйста, выберите другой логин.");
+                            okDialog.open();
+                            //fixme устал эту хню делать, не знаю как исправить, там баг, что после этого окна, не доступны кнопки отмена или сохранить
+                            return;
+                        } else {
+                            OkDialog okDialog = new OkDialog("Ошибка при сохранении данных: " + ex.getMessage());
+                            okDialog.open();
+                            return;
+
+                        }
+                    }
+                } catch (Exception ex) {
+                    OkDialog okDialog = new OkDialog("Неизвестная ошибка: " + ex.getMessage());
+                    okDialog.open();
+                    return;
+                }
+            }
             getListDataView().refreshAll();
-            getDataProvider().refreshAll();
+        });
+
+        getDataProvider().addDataProviderListener(e -> {
+            getColumns().get(getColumns().size() - 1).setFooter("Всего записей: " + collEmp());
         });
 
         addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
@@ -102,7 +149,6 @@ public class GridContent extends Grid<Employer> {
                     }
                     user.setLogin(login);
                 });
-        //todo
         this.addColumn(employer -> employer.getUser() == null ? "" : employer.getUser().getPassword())
                 .setHeader("Password")
                 .setEditorComponent(passwordField)
@@ -128,7 +174,8 @@ public class GridContent extends Grid<Employer> {
 
         rolesComboBox.setItemLabelGenerator(Roles::getRoleName);
         rolesComboBox.setItems(Service2.getInstance().getRolesService().list());
-        this.addColumn(employer -> employer.getUser() == null ? "" : employer.getUser().getRole().getRoleName())
+        this.addColumn(employer -> employer.getUser() == null
+                        ? "" : employer.getUser().getRole() == null ? "" : employer.getUser().getRole().getRoleName())
                 .setHeader("Должность")
                 .setEditorComponent(rolesComboBox)
                 .setResizable(true)
@@ -174,7 +221,7 @@ public class GridContent extends Grid<Employer> {
         if (employer == null) {
             return;
         }
-        Service2.getInstance().getEmployerService().remove(employer);
+        Service2.getInstance().deleteEmployer(employer);
         this.getListDataView().refreshAll();
 
     }
