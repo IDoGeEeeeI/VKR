@@ -7,8 +7,6 @@ import java.util.Date;
 
 @Data
 @Entity
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Task {

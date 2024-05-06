@@ -3,12 +3,12 @@ package rut.pan.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Data
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 public class Employer {
 
     @Id
@@ -25,5 +25,10 @@ public class Employer {
     @OneToOne
     private UserDto user;
 
+    @ManyToOne
+    private Employer supervisor;
+
+    @OneToMany(mappedBy = "supervisor")
+    private List<Employer> employers;
 
 }
