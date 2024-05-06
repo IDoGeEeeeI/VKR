@@ -2,6 +2,7 @@ package rut.pan.Enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import rut.pan.entity.TaskType;
 
 @AllArgsConstructor
 @Getter
@@ -9,7 +10,7 @@ public enum TaskEnum {
 
     STORY("Story", "Описание", "#00FFFF", ""),
     TASK("Task", "Задача", "#0000FF", ""),
-    BUG("Bug", "Баг", "#1E90FF", ""),
+    BUG("Bug", "Баг", "#DC143C", ""),
     SUBTASK("Subtask", "Подзадача", "FF0000", ""),
     TEST("Test", "Тест", "#008000", "");
 
@@ -23,6 +24,15 @@ public enum TaskEnum {
             if (type.equalsIgnoreCase(task.tag))
                 return task.color;
         }
-        return "#D3D3D3";
+        return "#008000"; //как заплатка навсякий
     }
+
+    public static String getTagByColor(String color) {
+        for (TaskEnum task : TaskEnum.values()) {
+            if (color.equalsIgnoreCase(task.color))
+                return task.tag;
+        }
+        return "Task"; //переписать
+    }
+
 }

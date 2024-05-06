@@ -7,17 +7,26 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import org.vaadin.stefan.fullcalendar.*;
+import org.vaadin.stefan.fullcalendar.dataprovider.InMemoryEntryProvider;
 import rut.pan.Enums.TaskEnum;
 import rut.pan.Utils.ConvertDateRu;
+import rut.pan.content.dialogs.EditTaskCalendar;
 import rut.pan.entity.Employer;
 import rut.pan.entity.Task;
 import rut.pan.service2.Service2;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CalendarView extends Div {
+
+    private Map<Entry, Task> entryTaskMap = new HashMap<>();
+
 
     public CalendarView(Employer employer) {
         FullCalendar calendarContent = FullCalendarBuilder.create().build();
@@ -34,8 +43,44 @@ public class CalendarView extends Div {
             entry.setDescription(task.getDescription());
             entry.setStart(task.getStartDate().toInstant());
             entry.setEnd(task.getEndDate().toInstant());
+            entryTaskMap.put(entry, task);
             calendarContent.getEntryProvider().asInMemory().addEntries(entry);
         }
+
+        calendarContent.addEntryClickedListener(e -> {
+            InMemoryEntryProvider<Entry> entryProvider = calendarContent.getEntryProvider().asInMemory();
+            Entry entry = e.getEntry();
+            Task task = entryTaskMap.get(entry);
+            EditTaskCalendar editTaskCalendar = new EditTaskCalendar(entry,
+            save -> {
+                task.setName(entry.getTitle());
+                task.setTaskType(Service2.getInstance().getTaskService().getTaskTypeByTag(TaskEnum.getTagByColor(entry.getColor())));
+                task.setDescription(entry.getDescription());
+                task.setStartDate(Date.from(entry.getStart().toInstant(ZoneOffset.UTC)));
+                task.setEndDate(Date.from(entry.getEnd().toInstant(ZoneOffset.UTC)));
+
+                Service2.getInstance().getTaskService().saveOrEditTask(task);
+                entryProvider.refreshAll();
+            },
+            del -> {
+                Service2.getInstance().getTaskService().deleteTask(task);
+                entryTaskMap.remove(entry);
+                entryProvider.refreshAll();
+
+            });
+
+            editTaskCalendar.open();
+
+        });
+
+        calendarContent.addTimeslotsSelectedListener(event -> {//todo не работает
+            Entry entry = new Entry();
+
+            entry.setStart(event.getStart());
+            entry.setEnd(event.getEnd());
+            entry.setAllDay(event.isAllDay());
+
+        });
 
 
         HorizontalLayout calendarButtons = new HorizontalLayout();
