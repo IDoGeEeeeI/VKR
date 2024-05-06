@@ -19,6 +19,14 @@ public class EmployerService {
         return iEmployerRepository.findAll();
     }
 
+    public List<Employer> getEmployersBySupervisor(Employer employer) {
+        return iEmployerRepository.getEmployersBySupervisor(employer);
+    }
+
+    public Employer findSupervisorByEmployer(String id) {
+        return iEmployerRepository.findSupervisorById(id);
+    }
+
     public Employer getEmployerByUser(UserDto user) {
         return iEmployerRepository.findEmployerByUser(user);
     }
