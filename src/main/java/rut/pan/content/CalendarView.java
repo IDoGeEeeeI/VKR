@@ -1,5 +1,6 @@
 package rut.pan.content;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -16,9 +17,7 @@ import rut.pan.entity.Task;
 import rut.pan.service2.Service2;
 
 import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,31 +45,24 @@ public class CalendarView extends Div {
             entryTaskMap.put(entry, task);
             calendarContent.getEntryProvider().asInMemory().addEntries(entry);
         }
-
         calendarContent.addEntryClickedListener(e -> {
             InMemoryEntryProvider<Entry> entryProvider = calendarContent.getEntryProvider().asInMemory();
             Entry entry = e.getEntry();
             Task task = entryTaskMap.get(entry);
-            EditTaskCalendar editTaskCalendar = new EditTaskCalendar(entry,
-            save -> {
-                task.setName(entry.getTitle());
-                task.setTaskType(Service2.getInstance().getTaskService().getTaskTypeByTag(TaskEnum.getTagByColor(entry.getColor())));
-                task.setDescription(entry.getDescription());
-                task.setStartDate(Date.from(entry.getStart().toInstant(ZoneOffset.UTC)));
-                task.setEndDate(Date.from(entry.getEnd().toInstant(ZoneOffset.UTC)));
+            EditTaskCalendar editTaskCalendar = new EditTaskCalendar(entry, task,
+                    (dialog, updatedTask) -> {
+                        Service2.getInstance().getTaskService().saveOrEditTask(updatedTask);
+                        entryProvider.refreshAll();
+                    },
+                    del -> {
+                        Service2.getInstance().getTaskService().deleteTask(task);
+                        entryTaskMap.remove(entry);
+                        entryProvider.refreshAll();
 
-                Service2.getInstance().getTaskService().saveOrEditTask(task);
-                entryProvider.refreshAll();
-            },
-            del -> {
-                Service2.getInstance().getTaskService().deleteTask(task);
-                entryTaskMap.remove(entry);
-                entryProvider.refreshAll();
-
-            });
+                    });
 
             editTaskCalendar.open();
-
+            //todo как залочить скролл у главной вьюхи - хз
         });
 
         calendarContent.addTimeslotsSelectedListener(event -> {//todo не работает

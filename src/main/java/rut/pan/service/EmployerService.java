@@ -24,7 +24,7 @@ public class EmployerService {
     }
 
     public Employer findSupervisorByEmployer(String id) {
-        return iEmployerRepository.findSupervisorById(id);
+        return iEmployerRepository.findSupervisorById(Long.valueOf(id));
     }
 
     public Employer getEmployerByUser(UserDto user) {

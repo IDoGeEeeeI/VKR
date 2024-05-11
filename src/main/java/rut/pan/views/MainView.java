@@ -25,6 +25,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import rut.pan.content.CalendarView;
 import rut.pan.content.UsersGridContent;
+import rut.pan.content.dialogs.AddTaskDialog;
+import rut.pan.content.dialogs.TaskView;
 import rut.pan.entity.Employer;
 import rut.pan.service2.Service2;
 
@@ -47,6 +49,7 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
     MainView() {
 
         getUser();
+
 
         getStyle().set("height", "100%");
 
@@ -191,6 +194,7 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
 
             Button admin = createButtonWithIcon(VaadinIcon.USER_STAR, "Админ");
             admin.addClickListener(e -> {
+                filterLayout.removeAll();
                 tasks.removeAll();
                 tasks.setVisible(true);
                 tasks.setEnabled(true);
@@ -198,47 +202,57 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
 
                 add.setVisible(true);
                 add.setEnabled(true);
+                filterLayout.add(addFilter);
                 filterLayout.add(add);
             });
             sidebar.add(admin);
         }
 
         projectsButton.addClickListener( e -> {
-            //todo
-        });
+            filterLayout.removeAll();
+            tasks.removeAll();
 
+            TaskView taskView = new TaskView(user);
+            tasks.add(taskView);
+            tasks.setVisible(true);
+            tasks.setEnabled(true);
+            filterLayout.add(addFilter);
 
-        //тестовая штука, просто для показа
-        Div div = new Div();
-        div.setVisible(false);
+            Button crateTask = new Button();
+            crateTask.setPrefixComponent(VaadinIcon.FILE_ADD.create());
+            crateTask.setText("Создать задачу");
+            crateTask.getStyle().set("left", "8px");
+            crateTask.getStyle().set("top", "4px");
+            crateTask.addClickListener(event -> {
+                AddTaskDialog addTaskDialog = new AddTaskDialog(
+                        (dialog, updatedTask) -> {
+                            Service2.getInstance().getTaskService().saveOrEditTask(updatedTask);
+                            taskView.reloadTaskList();
+                        });
+                addTaskDialog.open();
+                //todo new task dialog
+            });
 
-        projectsButton.addClickListener(e -> {
-            if (!div.isVisible()) {
-                div.add(Service2.getInstance().getTaskService().list().toString());
-                div.setVisible(true);
-            } else {
-                div.removeAll();
-                div.setVisible(false);
-            }
-
+            filterLayout.add(crateTask);
         });
 
         homeButton.addClickListener(e -> {
-            div.remove();
-            div.setVisible(false);
+
         });
 
         calendarButton.addClickListener(e -> {
+            filterLayout.removeAll();
             tasks.removeAll();
 
             CalendarView calendarView = new CalendarView(user);
             tasks.add(calendarView);
             tasks.setVisible(true);
             tasks.setEnabled(true);
+            filterLayout.add(addFilter);
         });
 
 
-        HorizontalLayout body = new HorizontalLayout(sidebar, workLayout, div);
+        HorizontalLayout body = new HorizontalLayout(sidebar, workLayout);
         body.setSizeFull();
 
         mainLayout.add(header, body);

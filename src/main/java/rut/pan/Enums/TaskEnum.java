@@ -12,7 +12,7 @@ public enum TaskEnum {
     TASK("Task", "Задача", "#0000FF", ""),
     BUG("Bug", "Баг", "#DC143C", ""),
     SUBTASK("Subtask", "Подзадача", "FF0000", ""),
-    TEST("Test", "Тест", "#008000", "");
+    TEST("Test", "Тест", "#9ACD32", "");
 
     private final String tag;
     private final String name;

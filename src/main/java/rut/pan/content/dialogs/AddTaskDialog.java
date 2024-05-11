@@ -13,33 +13,22 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import org.vaadin.stefan.fullcalendar.Entry;
-import rut.pan.Enums.TaskEnum;
 import rut.pan.entity.*;
 import rut.pan.service2.Service2;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.util.Date;
-import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * Диалоговое окно задач в календаре.
+ * Диалоговое для создания новой задачи.
  */
-public class EditTaskCalendar extends Dialog {
+public class AddTaskDialog extends Dialog {
 
-    /**
-     * Создать новое окно.
-     * @param yes действие на кнопку "Да".
-     * @param no действие на кнопку "Нет".
-     */
-    public EditTaskCalendar(Entry entry, Task task,
-                            BiConsumer<EditTaskCalendar, Task> yes,
-                            Consumer<EditTaskCalendar> no,
-                            Consumer<EditTaskCalendar> del) {
+    public AddTaskDialog(BiConsumer<AddTaskDialog, Task> yes,
+                         Consumer<AddTaskDialog> no) {
         super();
         VerticalLayout verticalLayout = new VerticalLayout();
         add(verticalLayout);
@@ -55,20 +44,18 @@ public class EditTaskCalendar extends Dialog {
         TextField name = new TextField();
         name.setLabel("Название");
         name.setWidthFull();
-        name.setValue(entry.getTitle());
         name.addValueChangeListener(e -> {
-            entry.setTitle(e.getValue());
+
         });
 
         ComboBox<TaskType> taskTypeComboBox = new ComboBox<>();
         taskTypeComboBox.setLabel("Тип задачи");
         taskTypeComboBox.setWidthFull();
         taskTypeComboBox.addValueChangeListener(e -> {
-            entry.setColor(TaskEnum.getColorByType(e.getValue().getType()));
+
         });
         taskTypeComboBox.setItemLabelGenerator(TaskType::getType);
         taskTypeComboBox.setItems(Service2.getInstance().getTaskService().getTaskTypes());
-        taskTypeComboBox.setValue(task.getTaskType());
 
 
         ComboBox<Status> statusComboBox = new ComboBox<>();
@@ -76,47 +63,39 @@ public class EditTaskCalendar extends Dialog {
         statusComboBox.setWidthFull();
         statusComboBox.setItemLabelGenerator(Status::getStatus);
         statusComboBox.setItems(Service2.getInstance().getTaskService().getStatus());
-        statusComboBox.setValue(task.getStatus());
 
         ComboBox<Prioritize> prioritizeComboBox = new ComboBox<>();
         prioritizeComboBox.setLabel("Приоритет задачи");
         prioritizeComboBox.setWidthFull();
         prioritizeComboBox.setItemLabelGenerator(Prioritize::getPrioritize);
         prioritizeComboBox.setItems(Service2.getInstance().getTaskService().getPrioritize());
-        prioritizeComboBox.setValue(task.getPrioritizer());
 
         ComboBox<Employer> employerComboBox = new ComboBox<>();
         employerComboBox.setLabel("Исполнитель");
         employerComboBox.setWidthFull();
         employerComboBox.setItemLabelGenerator(Employer::getName);
         employerComboBox.setItems(Service2.getInstance().getEmployerService().list());
-        employerComboBox.setValue(task.getEmployer());
 
         ComboBox<Employer> creatorComboBox = new ComboBox<>();
         creatorComboBox.setLabel("Создатель");
         creatorComboBox.setWidthFull();
         creatorComboBox.setItemLabelGenerator(Employer::getName);
         creatorComboBox.setItems(Service2.getInstance().getEmployerService().list());
-        creatorComboBox.setValue(task.getCreator());
-
 
         TextArea description = new TextArea();
         description.setLabel("Описание");
         description.setWidthFull();
-        description.setValue(entry.getDescription());
         description.addValueChangeListener(e -> {
-            entry.setDescription(e.getValue());
+
         });
 
         DatePicker start = new DatePicker();
         start.setLabel("Начало");
         start.setWidthFull();
-        start.setValue(entry.getStart().toLocalDate());
 
         DatePicker end = new DatePicker();
         end.setLabel("Конец");
         end.setWidthFull();
-        end.setValue(entry.getEnd().toLocalDate());
 
 
         start.addValueChangeListener(e -> {
@@ -127,7 +106,7 @@ public class EditTaskCalendar extends Dialog {
                 Notification.show("Дата начала не может быть позже даты окончания. Пожалуйста, выберите другую дату.");
                 start.setValue(endDate);
             } else {
-                entry.setStart(startDate.atStartOfDay(ZoneOffset.UTC).toInstant());
+
             }
         });
 
@@ -139,7 +118,7 @@ public class EditTaskCalendar extends Dialog {
                 Notification.show("Дата окончания не может быть раньше даты начала. Пожалуйста, выберите другую дату.");
                 end.setValue(startDate);
             } else {
-                entry.setEnd(endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant());
+
             }
         });
 
@@ -162,23 +141,24 @@ public class EditTaskCalendar extends Dialog {
         button.getElement().setAttribute("ButtonYes", true);
         button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         button.addClickListener(buttonClickEvent -> {
-            EditTaskCalendar.this.close();
-            task.setName(entry.getTitle());
-            task.setTaskType(
-                    Service2.getInstance()
-                            .getTaskService()
-                            .getTaskTypeByTag(TaskEnum.getTagByColor(entry.getColor()))
-            );
-            task.setStatus(statusComboBox.getValue());
-            task.setPrioritizer(prioritizeComboBox.getValue());
-            task.setEmployer(employerComboBox.getValue());
-            task.setCreator(creatorComboBox.getValue());
-            task.setDescription(entry.getDescription());
-            task.setStartDate(Date.from(entry.getStart().toInstant(ZoneOffset.UTC)));
-            task.setEndDate(Date.from(entry.getEnd().toInstant(ZoneOffset.UTC)));
+            if (name.isEmpty() || taskTypeComboBox.isEmpty() || statusComboBox.isEmpty() || prioritizeComboBox.isEmpty() || start.isEmpty() || end.isEmpty()) {
+                Notification.show("Пожалуйста, заполните все поля.", 5000, Notification.Position.MIDDLE);
+            } else {
+                AddTaskDialog.this.close();
+                Task task = new Task();
+                task.setName(name.getValue());
+                task.setTaskType(taskTypeComboBox.getValue());
+                task.setStatus(statusComboBox.getValue());
+                task.setPrioritizer(prioritizeComboBox.getValue());
+                task.setEmployer(employerComboBox.getValue());
+                task.setCreator(creatorComboBox.getValue());
+                task.setDescription(description.getValue());
+                task.setStartDate(Date.from(start.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
+                task.setEndDate(Date.from(end.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
-            EditTaskCalendar.this.close();
-            yes.accept(EditTaskCalendar.this, task);
+                AddTaskDialog.this.close();
+                yes.accept(AddTaskDialog.this, task);
+            }
         });
 
         horizontalLayout.add(button);
@@ -190,35 +170,20 @@ public class EditTaskCalendar extends Dialog {
         button.getElement().setAttribute("ButtonNo", true);
         button.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
         button.addClickListener(buttonClickEvent -> {
-            EditTaskCalendar.this.close();
-            no.accept(EditTaskCalendar.this);
-        });
-
-        horizontalLayout.add(interval, button);
-
-
-        button = new Button("Удалить");
-        button.getElement().setAttribute("ButtonDel", true);
-        button.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        button.addClickListener(buttonClickEvent -> {
-            EditTaskCalendar.this.close();
-            del.accept(EditTaskCalendar.this);
+            AddTaskDialog.this.close();
+            no.accept(AddTaskDialog.this);
         });
 
         horizontalLayout.add(interval, button);
 
         setModal(true);
         setDraggable(true);
-        setCloseOnEsc(true);
-        setCloseOnOutsideClick(true);
+        setCloseOnEsc(false);
+        setCloseOnOutsideClick(false);
+
     }
 
-    /**
-     * Создать новое окно.
-     * @param yes действие на кнопку "Да".
-     * @param del действие на кнопку "Удалить".
-     */
-    public EditTaskCalendar(Entry entry, Task task, BiConsumer<EditTaskCalendar, Task> yes, Consumer<EditTaskCalendar> del) {
-        this(entry, task, yes, no -> {}, del);
+    public AddTaskDialog(BiConsumer<AddTaskDialog, Task> yes) {
+        this(yes, no -> {});
     }
 }

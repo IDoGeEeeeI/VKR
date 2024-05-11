@@ -4,11 +4,15 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import rut.pan.entity.Employer;
 import rut.pan.entity.UserDto;
 import rut.pan.security.SecurityService;
+import rut.pan.service.CommentService;
 import rut.pan.service.EmployerService;
 import rut.pan.service.RolesService;
 import rut.pan.service.TaskService;
@@ -49,6 +53,9 @@ public class Service2 {
     @Autowired
     private RolesService rolesService;
 
+    @Autowired
+    private CommentService commentService;
+
     @Transactional
     public Employer saveOrEditEmployer(Employer savedEmployer) {
         UserDto userDto = savedEmployer.getUser();
@@ -61,6 +68,14 @@ public class Service2 {
     public void deleteEmployer(Employer employer) {
         employerService.remove(employer);
         securityService.deleteUser(employer.getUser());
+    }
+
+    public Employer getEmployerByAuthenticationUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
+            return Service2.getInstance().getEmployerService().getEmployerByUser(Service2.getInstance().getSecurityService().getUserByLogin(authentication.getName()));
+        }
+        return null;
     }
 
 

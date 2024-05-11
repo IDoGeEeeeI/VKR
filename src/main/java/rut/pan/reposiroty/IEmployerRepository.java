@@ -11,7 +11,7 @@ import java.util.List;
 public interface IEmployerRepository extends JpaRepository<Employer, Long> {
     Employer findEmployerByUser(UserDto userDto);
 
-    Employer findSupervisorById(String id);
+    Employer findSupervisorById(Long id);
     List<Employer> getEmployersBySupervisor(Employer employer);
 
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Entity
@@ -12,7 +13,8 @@ import java.util.Date;
 public class Task {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", unique = true, nullable = false)
     private Integer id;
 
     private String name;
@@ -29,8 +31,21 @@ public class Task {
     @ManyToOne( optional = false )
     private Employer employer;
 
+    @ManyToOne( optional = false )
+    private Employer creator;
+
     private String description;
 
     @ManyToOne
     private TaskType taskType;
+
+    @ManyToOne
+    private Status status;
+
+    @ManyToOne
+    private Prioritize prioritizer;
+
+    @OneToMany(mappedBy = "task")
+    private List<Comment> comments;
+
 }
