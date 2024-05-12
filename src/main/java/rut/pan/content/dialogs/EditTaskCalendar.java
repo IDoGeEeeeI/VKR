@@ -18,11 +18,8 @@ import rut.pan.Enums.TaskEnum;
 import rut.pan.entity.*;
 import rut.pan.service2.Service2;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.util.Date;
-import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -55,9 +52,9 @@ public class EditTaskCalendar extends Dialog {
         TextField name = new TextField();
         name.setLabel("Название");
         name.setWidthFull();
-        name.setValue(entry.getTitle());
+        name.setValue(task.getName());
         name.addValueChangeListener(e -> {
-            entry.setTitle(e.getValue());
+            entry.setTitle(task.getName() + "(" + task.getEmployer().getName() + ")");
         });
 
         ComboBox<TaskType> taskTypeComboBox = new ComboBox<>();
@@ -98,12 +95,13 @@ public class EditTaskCalendar extends Dialog {
         creatorComboBox.setItemLabelGenerator(Employer::getName);
         creatorComboBox.setItems(Service2.getInstance().getEmployerService().list());
         creatorComboBox.setValue(task.getCreator());
+        creatorComboBox.setEnabled(false);
 
 
         TextArea description = new TextArea();
         description.setLabel("Описание");
         description.setWidthFull();
-        description.setValue(entry.getDescription());
+        description.setValue(task.getDescription());
         description.addValueChangeListener(e -> {
             entry.setDescription(e.getValue());
         });
@@ -111,35 +109,32 @@ public class EditTaskCalendar extends Dialog {
         DatePicker start = new DatePicker();
         start.setLabel("Начало");
         start.setWidthFull();
-        start.setValue(entry.getStart().toLocalDate());
+        LocalDate startDate = Instant.ofEpochMilli(task.getStartDate().getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+        start.setValue(startDate);
 
         DatePicker end = new DatePicker();
         end.setLabel("Конец");
         end.setWidthFull();
-        end.setValue(entry.getEnd().toLocalDate());
+        LocalDate endDate = Instant.ofEpochMilli(task.getEndDate().getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+        end.setValue(endDate);
+
 
 
         start.addValueChangeListener(e -> {
-            LocalDate startDate = e.getValue();
-            LocalDate endDate = end.getValue();
-
-            if (endDate != null && endDate.isBefore(startDate)) {
+            if (end.getValue() != null && end.getValue().isBefore(e.getValue())) {
                 Notification.show("Дата начала не может быть позже даты окончания. Пожалуйста, выберите другую дату.");
-                start.setValue(endDate);
+                start.setValue(end.getValue());
             } else {
-                entry.setStart(startDate.atStartOfDay(ZoneOffset.UTC).toInstant());
+                entry.setStart(e.getValue());
             }
         });
 
         end.addValueChangeListener(e -> {
-            LocalDate endDate = e.getValue();
-            LocalDate startDate = start.getValue();
-
-            if (startDate != null && endDate.isBefore(startDate)) {
+            if (start.getValue() != null && e.getValue().isBefore(start.getValue())) {
                 Notification.show("Дата окончания не может быть раньше даты начала. Пожалуйста, выберите другую дату.");
-                end.setValue(startDate);
+                end.setValue(start.getValue());
             } else {
-                entry.setEnd(endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant());
+                entry.setEnd(e.getValue());
             }
         });
 
@@ -163,7 +158,7 @@ public class EditTaskCalendar extends Dialog {
         button.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         button.addClickListener(buttonClickEvent -> {
             EditTaskCalendar.this.close();
-            task.setName(entry.getTitle());
+            task.setName(name.getValue());
             task.setTaskType(
                     Service2.getInstance()
                             .getTaskService()
@@ -172,10 +167,12 @@ public class EditTaskCalendar extends Dialog {
             task.setStatus(statusComboBox.getValue());
             task.setPrioritizer(prioritizeComboBox.getValue());
             task.setEmployer(employerComboBox.getValue());
-            task.setCreator(creatorComboBox.getValue());
-            task.setDescription(entry.getDescription());
-            task.setStartDate(Date.from(entry.getStart().toInstant(ZoneOffset.UTC)));
-            task.setEndDate(Date.from(entry.getEnd().toInstant(ZoneOffset.UTC)));
+//            task.setCreator(creatorComboBox.getValue());
+            task.setDescription(description.getValue());
+            Date startDate1 = Date.from(start.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            task.setStartDate(startDate1);
+            Date endDate1 = Date.from(end.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            task.setEndDate(endDate1);
 
             EditTaskCalendar.this.close();
             yes.accept(EditTaskCalendar.this, task);

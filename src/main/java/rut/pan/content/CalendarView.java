@@ -1,6 +1,5 @@
 package rut.pan.content;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
@@ -34,12 +33,18 @@ public class CalendarView extends Div {
         calendarContent.setLocale(CalendarLocale.RUSSIAN.getLocale());
 
         List<Task> taskList = Service2.getInstance().getTaskService().getListByEmployer(employer);
+        List<Employer> employers = Service2.getInstance().getEmployerService().getEmployersBySupervisor(employer);
+        if (!employers.isEmpty()) {
+            for (Employer epm : employers) {
+                taskList.addAll(Service2.getInstance().getTaskService().getListByEmployer(epm));
+            }
+        }
+
         for (Task task : taskList) {
             Entry entry = new Entry();
-            entry.setTitle(task.getName());
+            entry.setTitle(task.getName() + " (" + task.getEmployer().getName() + ")");
 
             entry.setColor(TaskEnum.getColorByType(task.getTaskType().getType()));
-            entry.setDescription(task.getDescription());
             entry.setStart(task.getStartDate().toInstant());
             entry.setEnd(task.getEndDate().toInstant());
             entryTaskMap.put(entry, task);
