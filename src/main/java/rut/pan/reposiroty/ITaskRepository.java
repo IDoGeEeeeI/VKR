@@ -15,5 +15,7 @@ public interface ITaskRepository extends JpaRepository<Task, Long> {
 
     List<Task> findByEmployer(Employer employer);
 
+    List<Task> findByEmployer_IdIn(List<Integer> employerIds);
+
 
 }

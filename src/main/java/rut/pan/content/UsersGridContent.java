@@ -28,6 +28,9 @@ import rut.pan.service2.Service2;
 
 import java.util.Collection;
 
+/**
+ * Страница администрирования.
+ */
 public class UsersGridContent extends Grid<Employer> {
 
     public UsersGridContent() {

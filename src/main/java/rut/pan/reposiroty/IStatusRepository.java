@@ -9,4 +9,6 @@ public interface IStatusRepository extends JpaRepository<Status, String> {
 
     Status getStatusById(Long id);
 
+    Status getStatusByStatus(String s);
+
 }

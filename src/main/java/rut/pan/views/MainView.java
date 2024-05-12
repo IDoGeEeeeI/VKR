@@ -24,9 +24,10 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import rut.pan.content.CalendarView;
+import rut.pan.content.EmployersGridContent;
+import rut.pan.content.TaskView;
 import rut.pan.content.UsersGridContent;
-import rut.pan.content.dialogs.AddTaskDialog;
-import rut.pan.content.dialogs.TaskView;
+import rut.pan.content.dialogs.*;
 import rut.pan.entity.Employer;
 import rut.pan.service2.Service2;
 
@@ -62,7 +63,7 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
 
         VerticalLayout sidebar = new VerticalLayout();
 
-        Button homeButton = createButtonWithIcon(VaadinIcon.HOME_O, "Главная");
+//        Button homeButton = createButtonWithIcon(VaadinIcon.HOME_O, "Главная");
         Button projectsButton = createButtonWithIcon(VaadinIcon.TASKS, "Задачи");
         Button calendarButton = createButtonWithIcon(VaadinIcon.CALENDAR, "Календарь");
 
@@ -135,7 +136,8 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
         searchField.setPlaceholder("Поиск");
 
 
-        sidebar.add(userDiv, searchField, homeButton, projectsButton, calendarButton);
+//        sidebar.add(userDiv, searchField, homeButton, projectsButton, calendarButton);
+        sidebar.add(userDiv, searchField, projectsButton, calendarButton);
         sidebar.addClassName("menu");
 
 
@@ -146,14 +148,6 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
         HorizontalLayout filterLayout = new HorizontalLayout();
         filterLayout.setWidthFull();
         filterLayout.addClassName("filter-layout");
-        //todo dialog.addThemeVariants(DialogVariant.LUMO_NO_PADDING);
-
-        Button addFilter = new Button();
-        addFilter.setPrefixComponent(VaadinIcon.FORM.create());
-        addFilter.setText("Добавить фильтры");
-        addFilter.getStyle().set("left", "8px");
-        addFilter.getStyle().set("top", "4px");
-        filterLayout.add(addFilter);
 
         Div tasks = new Div();
         tasks.addClassName("tasks-layout");
@@ -168,6 +162,41 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
                 || "manager".equals(user.getUser().getRole().getRoleName())) {
             Button admin = createButtonWithIcon(VaadinIcon.GROUP, "Подчиненные");
             sidebar.add(admin);
+
+            EmployersGridContent grid = new EmployersGridContent();
+            grid.setWidthFull();
+            grid.setHeightFull();
+            grid.setItems(Service2.getInstance().getEmployerService().getEmployersBySupervisor(user));
+
+            Button add = new Button();
+            add.setPrefixComponent(VaadinIcon.PLUS.create());
+            add.setText("Добавить нового подчиненного");
+            add.getStyle().set("left", "8px");
+            add.getStyle().set("top", "4px");
+            add.setVisible(false);
+            add.setEnabled(false);
+            add.addClickListener(e -> {
+                EmployerDialog employerDialog = new EmployerDialog(user,
+                        (yes, empl) -> {
+                            Service2.getInstance().saveOrEditEmployer(empl);
+                            grid.setItems(Service2.getInstance().getEmployerService().getEmployersBySupervisor(user));
+                        });
+                employerDialog.open();
+            });
+
+            admin.addClickListener(e -> {
+                filterLayout.removeAll();
+                tasks.removeAll();
+                tasks.setVisible(true);
+                tasks.setEnabled(true);
+                tasks.add(grid);
+
+                add.setVisible(true);
+                add.setEnabled(true);
+                filterLayout.add(add);
+            });
+
+
         }
         if ("admin".equals(user.getUser().getRole().getRoleName())) {
             UsersGridContent grid = new UsersGridContent();
@@ -202,11 +231,11 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
 
                 add.setVisible(true);
                 add.setEnabled(true);
-                filterLayout.add(addFilter);
                 filterLayout.add(add);
             });
             sidebar.add(admin);
         }
+
 
         projectsButton.addClickListener( e -> {
             filterLayout.removeAll();
@@ -216,11 +245,23 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
             tasks.add(taskView);
             tasks.setVisible(true);
             tasks.setEnabled(true);
+
+            Button addFilter = new Button("Добавить фильтры");
+            addFilter.setPrefixComponent(VaadinIcon.FORM.create());
+            addFilter.getStyle().set("left", "8px");
+            addFilter.getStyle().set("top", "4px");
             filterLayout.add(addFilter);
 
-            Button crateTask = new Button();
+            addFilter.addClickListener(eve -> {
+                FilterDialog filterDialog = new FilterDialog(
+                        (yes, taskList)-> {
+                            taskView.reloadTaskListByFilter(taskList);
+                        });
+                filterDialog.open();
+            });
+
+            Button crateTask = new Button("Создать задачу");
             crateTask.setPrefixComponent(VaadinIcon.FILE_ADD.create());
-            crateTask.setText("Создать задачу");
             crateTask.getStyle().set("left", "8px");
             crateTask.getStyle().set("top", "4px");
             crateTask.addClickListener(event -> {
@@ -230,15 +271,37 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
                             taskView.reloadTaskList();
                         });
                 addTaskDialog.open();
-                //todo new task dialog
             });
 
             filterLayout.add(crateTask);
-        });
 
-        homeButton.addClickListener(e -> {
+            Button editTask = new Button("Изменить задачу");
+            editTask.setPrefixComponent(VaadinIcon.EDIT.create());
+            editTask.getStyle().set("left", "8px");
+            editTask.getStyle().set("top", "4px");
+            editTask.addClickListener(event -> {
+                EditTaskDialog editTaskDialog = new EditTaskDialog(taskView.getRightTask(),
+                        (dialog, updatedTask) -> {
+                            Service2.getInstance().getTaskService().saveOrEditTask(updatedTask);
+                            taskView.reloadTaskList();
+                        },
+                        del -> {
+                            Service2.getInstance().getTaskService().deleteTask(taskView.getRightTask());
+                            taskView.reloadTaskList();
+                            taskView.reloadTaskLayoutDefault();
+                        });
+                editTaskDialog.open();
+            });
+
+            filterLayout.add(editTask);
+
 
         });
+        projectsButton.click();
+
+//        homeButton.addClickListener(e -> {
+//
+//        });
 
         calendarButton.addClickListener(e -> {
             filterLayout.removeAll();
@@ -248,7 +311,6 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
             tasks.add(calendarView);
             tasks.setVisible(true);
             tasks.setEnabled(true);
-            filterLayout.add(addFilter);
         });
 
 

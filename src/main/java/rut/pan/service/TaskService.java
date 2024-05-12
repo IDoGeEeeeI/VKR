@@ -8,13 +8,15 @@ import rut.pan.reposiroty.IStatusRepository;
 import rut.pan.reposiroty.ITaskRepository;
 import rut.pan.reposiroty.ITaskTypeRepository;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TaskService {
 
     @Autowired
-    private ITaskRepository iTaskTaskRepository;
+    private ITaskRepository iTaskRepository;
 
     @Autowired
     private ITaskTypeRepository iTaskTypeRepository;
@@ -27,19 +29,30 @@ public class TaskService {
 
 
     public List<Task> list() {
-        return iTaskTaskRepository.findAll();
+        return iTaskRepository.findAll();
     }
 
-    public List<Task> getTasksByEmployer(Employer employer) {
-        return iTaskTaskRepository.findByEmployer(employer);
+    public List<Task> getTasksByEmployer(Employer... employers) {
+        List<Integer> employerIds = Arrays.stream(employers)
+                .map(Employer::getId)
+                .collect(Collectors.toList());
+        return iTaskRepository.findByEmployer_IdIn(employerIds);
     }
 
     public List<Task> getListByEmployer(Employer employer) {
-        return iTaskTaskRepository.findByEmployer(employer);
+        return iTaskRepository.findByEmployer(employer);
     }
 
     public List<Task> getAllTasksByEmployerId(Integer employerId) {
-        return iTaskTaskRepository.getAllTasksByEmployerId(employerId);
+        return iTaskRepository.getAllTasksByEmployerId(employerId);
+    }
+
+    public List<Status> getAllStatus() {
+        return iStatusRepository.findAll();
+    }
+
+    public Status getStatusByName(String s) {
+        return iStatusRepository.getStatusByStatus(s);
     }
 
     public Status getStatusByTask(Task task) {
@@ -55,17 +68,21 @@ public class TaskService {
     }
 
     public void saveOrEditTask(Task task) {
-        if (task.getId() != null && iTaskTaskRepository.existsById(Long.valueOf(task.getId()))) {
-            iTaskTaskRepository.save(task);
+        if (task.getId() != null && iTaskRepository.existsById(Long.valueOf(task.getId()))) {
+            iTaskRepository.save(task);
         } else if (task.getId() == null) {
-            iTaskTaskRepository.save(task);
+            iTaskRepository.save(task);
         } else {
             throw new IllegalArgumentException("Task with given ID does not exist");
         }
     }
 
     public void deleteTask(Task task) {
-        iTaskTaskRepository.delete(task);
+        if (task.getId() != null && iTaskRepository.existsById(Long.valueOf(task.getId()))) {
+            iTaskRepository.delete(task);
+        } else {
+            throw new IllegalArgumentException("Task with given ID does not exist");
+        }
     }
 
     public List<TaskType> getTaskTypes() {
@@ -77,6 +94,6 @@ public class TaskService {
     }
 
     public Task getTaskById(String id) {
-        return iTaskTaskRepository.findById(Long.valueOf(id)).get();
+        return iTaskRepository.findById(Long.valueOf(id)).get();
     }
 }

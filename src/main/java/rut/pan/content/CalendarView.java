@@ -62,7 +62,7 @@ public class CalendarView extends Div {
                     });
 
             editTaskCalendar.open();
-            //todo как залочить скролл у главной вьюхи - хз
+            //как залочить скролл у главной вьюхи - хз
         });
 
         calendarContent.addTimeslotsSelectedListener(event -> {//todo не работает

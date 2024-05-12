@@ -22,13 +22,10 @@ import java.util.Date;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-/**
- * Диалоговое для создания новой задачи.
- */
-public class AddTaskDialog extends Dialog {
+public class EditTaskDialog extends Dialog {
 
-    public AddTaskDialog(BiConsumer<AddTaskDialog, Task> yes,
-                         Consumer<AddTaskDialog> no) {
+    public EditTaskDialog(Task task, BiConsumer<EditTaskDialog, Task> yes,
+                         Consumer<EditTaskDialog> no, Consumer<EditTaskDialog> del) {
         super();
         VerticalLayout verticalLayout = new VerticalLayout();
         add(verticalLayout);
@@ -44,12 +41,15 @@ public class AddTaskDialog extends Dialog {
         TextField name = new TextField();
         name.setLabel("Название");
         name.setWidthFull();
+        name.setValue(task.getName());
+
 
         ComboBox<TaskType> taskTypeComboBox = new ComboBox<>();
         taskTypeComboBox.setLabel("Тип задачи");
         taskTypeComboBox.setWidthFull();
         taskTypeComboBox.setItemLabelGenerator(TaskType::getType);
         taskTypeComboBox.setItems(Service2.getInstance().getTaskService().getTaskTypes());
+        taskTypeComboBox.setValue(task.getTaskType());
 
 
         ComboBox<Status> statusComboBox = new ComboBox<>();
@@ -57,37 +57,43 @@ public class AddTaskDialog extends Dialog {
         statusComboBox.setWidthFull();
         statusComboBox.setItemLabelGenerator(Status::getStatus);
         statusComboBox.setItems(Service2.getInstance().getTaskService().getStatus());
+        statusComboBox.setValue(task.getStatus());
 
         ComboBox<Prioritize> prioritizeComboBox = new ComboBox<>();
         prioritizeComboBox.setLabel("Приоритет задачи");
         prioritizeComboBox.setWidthFull();
         prioritizeComboBox.setItemLabelGenerator(Prioritize::getPrioritize);
         prioritizeComboBox.setItems(Service2.getInstance().getTaskService().getPrioritize());
+        prioritizeComboBox.setValue(task.getPrioritizer());
 
         ComboBox<Employer> employerComboBox = new ComboBox<>();
         employerComboBox.setLabel("Исполнитель");
         employerComboBox.setWidthFull();
         employerComboBox.setItemLabelGenerator(Employer::getName);
         employerComboBox.setItems(Service2.getInstance().getEmployerService().list());
+        employerComboBox.setValue(task.getEmployer());
 
         ComboBox<Employer> creatorComboBox = new ComboBox<>();
         creatorComboBox.setLabel("Создатель");
         creatorComboBox.setWidthFull();
         creatorComboBox.setItemLabelGenerator(Employer::getName);
         creatorComboBox.setItems(Service2.getInstance().getEmployerService().list());
+        creatorComboBox.setValue(task.getCreator());
 
         TextArea description = new TextArea();
         description.setLabel("Описание");
         description.setWidthFull();
+        description.setValue(task.getDescription());
 
         DatePicker start = new DatePicker();
         start.setLabel("Начало");
         start.setWidthFull();
+        start.setValue(task.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
 
         DatePicker end = new DatePicker();
         end.setLabel("Конец");
         end.setWidthFull();
-
+        end.setValue(task.getEndDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
 
         start.addValueChangeListener(e -> {
             LocalDate startDate = e.getValue();
@@ -97,7 +103,7 @@ public class AddTaskDialog extends Dialog {
                 Notification.show("Дата начала не может быть позже даты окончания. Пожалуйста, выберите другую дату.");
                 start.setValue(endDate);
             } else {
-                //что хотел я? хз
+
             }
         });
 
@@ -135,8 +141,7 @@ public class AddTaskDialog extends Dialog {
             if (name.isEmpty() || taskTypeComboBox.isEmpty() || statusComboBox.isEmpty() || prioritizeComboBox.isEmpty() || start.isEmpty() || end.isEmpty()) {
                 Notification.show("Пожалуйста, заполните все поля.", 5000, Notification.Position.MIDDLE);
             } else {
-                AddTaskDialog.this.close();
-                Task task = new Task();
+                EditTaskDialog.this.close();
                 task.setName(name.getValue());
                 task.setTaskType(taskTypeComboBox.getValue());
                 task.setStatus(statusComboBox.getValue());
@@ -147,8 +152,8 @@ public class AddTaskDialog extends Dialog {
                 task.setStartDate(Date.from(start.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
                 task.setEndDate(Date.from(end.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
 
-                AddTaskDialog.this.close();
-                yes.accept(AddTaskDialog.this, task);
+                EditTaskDialog.this.close();
+                yes.accept(EditTaskDialog.this, task);
             }
         });
 
@@ -161,11 +166,22 @@ public class AddTaskDialog extends Dialog {
         button.getElement().setAttribute("ButtonNo", true);
         button.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
         button.addClickListener(buttonClickEvent -> {
-            AddTaskDialog.this.close();
-            no.accept(AddTaskDialog.this);
+            EditTaskDialog.this.close();
+            no.accept(EditTaskDialog.this);
         });
 
         horizontalLayout.add(interval, button);
+
+        button = new Button("Удалить");
+        button.getElement().setAttribute("ButtonDel", true);
+        button.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        button.addClickListener(buttonClickEvent -> {
+            EditTaskDialog.this.close();
+            del.accept(EditTaskDialog.this);
+        });
+
+        horizontalLayout.add(interval, button);
+
 
         setModal(true);
         setDraggable(true);
@@ -174,7 +190,7 @@ public class AddTaskDialog extends Dialog {
 
     }
 
-    public AddTaskDialog(BiConsumer<AddTaskDialog, Task> yes) {
-        this(yes, no -> {});
+    public EditTaskDialog(Task task, BiConsumer<EditTaskDialog, Task> yes, Consumer<EditTaskDialog> del) {
+        this(task, yes, no -> {}, del);
     }
 }

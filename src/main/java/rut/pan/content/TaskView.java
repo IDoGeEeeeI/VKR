@@ -1,7 +1,8 @@
-package rut.pan.content.dialogs;
+package rut.pan.content;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.avatar.Avatar;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -12,18 +13,28 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
 import com.vaadin.flow.dom.Style;
+import lombok.Getter;
 import rut.pan.Enums.TaskEnum;
-import rut.pan.content.MessageListView;
+import rut.pan.content.dialogs.AppointDialog;
 import rut.pan.entity.Employer;
+import rut.pan.entity.Status;
 import rut.pan.entity.Task;
 import rut.pan.service2.Service2;
 
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+
 public class TaskView extends SplitLayout {
 
+    @Getter
     private VerticalLayout leftLayout = new VerticalLayout();
     private Div rightLayout = new Div();
 
     private final Employer employer;
+
+    @Getter
+    private Task rightTask;
 
     public TaskView(Employer employer) {
         this.employer = employer;
@@ -32,8 +43,6 @@ public class TaskView extends SplitLayout {
     }
 
     private void initializeLayout() {
-        //todo кнопки создания и тд в фильтровом лейауте
-        //todo это для фильтра - Service2.getInstance().getTaskService().getTasksByEmployer(employer)
         leftLayout.setMinWidth("250px");
 //        leftLayout.setSpacing(false);
 //        leftLayout.setPadding(false);
@@ -41,7 +50,8 @@ public class TaskView extends SplitLayout {
         addToPrimary(leftLayout);
         addToSecondary(rightLayout);
         createButtons();
-        createTaskRightView(null);
+        Component component = leftLayout.getChildren().findFirst().get();
+        createTaskRightView(Service2.getInstance().getTaskService().getTaskById(component.getElement().getProperty("task-id")));
         setHeight("780px");
         setSplitterPosition(15);
 
@@ -49,11 +59,8 @@ public class TaskView extends SplitLayout {
     }
 
     private void createTaskRightView(Task task) {
-        if (task == null) {
-            Component component = leftLayout.getChildren().findFirst().get();
-            task = Service2.getInstance().getTaskService().getTaskById(component.getElement().getProperty("task-id"));
-        }
-
+        rightTask = task;
+        rightLayout.removeAll();
         VerticalLayout taskView = new VerticalLayout();
 
         Div nameTaskDiv = new Div(task.getName());
@@ -77,12 +84,30 @@ public class TaskView extends SplitLayout {
 
         horizontalLayout1.add(avatarImage, empName);
 
-
         Details infoDetail = new Details("Детали");
         infoDetail.setOpened(true);
+        infoDetail.setWidthFull();
 
         Div infoDiv = new Div();
-        //todo иконки добавить
+
+        HorizontalLayout horizontalLayoutInfo0 = new HorizontalLayout();
+        Div cr = new Div("Автор: ");
+        cr.getStyle().set("marginLeft", "10px");
+        cr.getStyle().set("font-size", "1.2rem");
+
+        Avatar avatarCreatorImage = new Avatar();
+        avatarCreatorImage.addClassName("avatar");
+        avatarCreatorImage.setHeight("24px");
+        avatarCreatorImage.setWidth("24px");
+        avatarCreatorImage.setName(task.getCreator().getName());
+
+        Div creatorName = new Div();
+        creatorName.add(task.getCreator().getName());
+        creatorName.getStyle().set("font-size", "1.2rem");
+
+        horizontalLayoutInfo0.add(cr, avatarCreatorImage, creatorName);
+
+        //иконки добавить
         HorizontalLayout horizontalLayoutInfo1 = new HorizontalLayout();
         Div s = new Div("Статус: " + task.getStatus().getStatus());
         s.getStyle().set("marginLeft", "10px");
@@ -101,7 +126,7 @@ public class TaskView extends SplitLayout {
         p.getStyle().set("font-size", "1.2rem");
         horizontalLayoutInfo3.add(p);
 
-        infoDiv.add(horizontalLayoutInfo1, horizontalLayoutInfo2, horizontalLayoutInfo3);
+        infoDiv.add(horizontalLayoutInfo0, horizontalLayoutInfo1, horizontalLayoutInfo2, horizontalLayoutInfo3);
 
         infoDetail.add(infoDiv);
 
@@ -110,8 +135,12 @@ public class TaskView extends SplitLayout {
         descriptionDetail.setWidthFull();
         descriptionDetail.add(new Span(task.getDescription()));
         Details files = new Details("Приложенные фалы");
-        //todo files
         files.setOpened(false);
+        //todo files - MinIO
+//        Upload upload = new Upload();
+//        upload.setAcceptedFileTypes("image/jpeg", "image/png");
+//        upload.setAutoUpload(true);
+//        files.add(upload);
         descriptionDetail.add(files);
 
         Details commentsDetail = new Details("Комментарии");
@@ -119,15 +148,108 @@ public class TaskView extends SplitLayout {
         commentsDetail.setWidthFull();
         commentsDetail.add(new MessageListView(task));
 
+        HorizontalLayout buttonsLayout = createButtonsStatus(task.getStatus().getStatus(), task);
 
-        taskView.add(nameTaskDiv, horizontalLayout1, infoDetail, descriptionDetail, commentsDetail);
+        taskView.add(nameTaskDiv, horizontalLayout1, buttonsLayout, infoDetail, descriptionDetail, commentsDetail);
         rightLayout.add(taskView);
 
     }
 
+    private HorizontalLayout createButtonsStatus(String status, Task task) {
+        HorizontalLayout buttonsLayout = new HorizontalLayout();
+
+        Button appoint = new Button("Назначить");
+        Button startWork = new Button("Начать работу");
+        Button stopWork = new Button("Остановить работу");
+        Button agreed = new Button("Решение запроса");
+        Button close = new Button("Закрыть запрос");
+        Button reopen = new Button("Переоткрыть запрос");
+
+        List<Status> allStatus = Service2.getInstance().getTaskService().getAllStatus();
+
+        appoint.addClickListener(e -> {
+            AppointDialog appointDialog = new AppointDialog(task,
+            yes -> {
+                Service2.getInstance().getTaskService().saveOrEditTask(task);
+                reloadTaskLayout(task);
+            });
+            appointDialog.open();
+        });
+
+        startWork.addClickListener(e -> {
+            task.setStatus(allStatus.get(1)); //кринж
+            task.setStartDate(Date.from(Instant.now()));
+            Service2.getInstance().getTaskService().saveOrEditTask(task);
+
+            reloadButtons(buttonsLayout, task);
+            reloadTaskLayout(task);
+        });
+
+        stopWork.addClickListener(e -> {
+            task.setStatus(allStatus.get(0));
+            Service2.getInstance().getTaskService().saveOrEditTask(task);
+
+            reloadButtons(buttonsLayout, task);
+            reloadTaskLayout(task);
+        });
+
+        agreed.addClickListener(e -> {
+            task.setStatus(allStatus.get(2));
+            Service2.getInstance().getTaskService().saveOrEditTask(task);
+
+            reloadButtons(buttonsLayout, task);
+            reloadTaskLayout(task);
+        });
+
+        close.addClickListener(e -> {
+            task.setStatus(allStatus.get(4));
+            Service2.getInstance().getTaskService().saveOrEditTask(task);
+
+            reloadButtons(buttonsLayout, task);
+            reloadTaskLayout(task);
+        });
+
+        reopen.addClickListener(e -> {
+            task.setStatus(allStatus.get(3));
+            Service2.getInstance().getTaskService().saveOrEditTask(task);
+
+            reloadButtons(buttonsLayout, task);
+            reloadTaskLayout(task);
+        });
+
+        buttonsLayout.add(appoint);
+        if ("OPEN".equals(status) || "REOPENED".equals(status)) {
+            buttonsLayout.add(startWork, agreed, close);
+        } else if ("IN PROGRESS".equals(task.getStatus().getStatus())) {
+            buttonsLayout.add(stopWork, agreed, close);
+        } else if ("RESOLVED".equals(status)) {
+            buttonsLayout.add(reopen, close);
+        } else if ("CLOSED".equals(status)) {
+            buttonsLayout.add(agreed, reopen);
+        }
+
+        return buttonsLayout;
+    }
+
+    public void reloadButtons(HorizontalLayout buttonsLayout, Task task) {
+        buttonsLayout.removeAll();
+        HorizontalLayout newButtonsLayout = createButtonsStatus(task.getStatus().getStatus(), task);
+        buttonsLayout.add(newButtonsLayout);
+    }
+
     private void createButtons() {
-//        for (Task task : Service2.getInstance().getTaskService().getTasksByEmployer(employer)) {
         for (Task task : Service2.getInstance().getTaskService().list()) {
+            Div taskDiv = createDivTask(task);
+            taskDiv.addClickListener(e -> {
+                buttonClickHandler(task);
+            });
+            leftLayout.add(taskDiv);
+        }
+    }
+
+    public void reloadTaskListByFilter(List<Task> tasks) {
+        leftLayout.removeAll();
+        for (Task task : tasks) {
             Div taskDiv = createDivTask(task);
             taskDiv.addClickListener(e -> {
                 buttonClickHandler(task);
@@ -145,6 +267,15 @@ public class TaskView extends SplitLayout {
             });
             leftLayout.add(taskDiv);
         }
+    }
+
+    public void reloadTaskLayout(Task task) {
+        createTaskRightView(task);
+    }
+
+    public void reloadTaskLayoutDefault() {
+        Component component = leftLayout.getChildren().findFirst().get();
+        createTaskRightView(Service2.getInstance().getTaskService().getTaskById(component.getElement().getProperty("task-id")));
     }
 
     private void buttonClickHandler(Task task) {

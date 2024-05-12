@@ -23,7 +23,11 @@ public class EmployerService {
         return iEmployerRepository.getEmployersBySupervisor(employer);
     }
 
-    public Employer findSupervisorByEmployer(String id) {
+    public List<Employer> getEmployersBySupervisorIsNot(Employer employer) {
+        return iEmployerRepository.findEmployerBySupervisorIsNotIncludingNull(employer);
+    }
+
+    public Employer findSupervisorByEmployerId(String id) {
         return iEmployerRepository.findSupervisorById(Long.valueOf(id));
     }
 
