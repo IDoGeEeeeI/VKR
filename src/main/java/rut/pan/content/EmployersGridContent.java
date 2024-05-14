@@ -1,12 +1,19 @@
 package rut.pan.content;
 
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.editor.Editor;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
+import rut.pan.content.dialogs.EmployerRequestDialog;
 import rut.pan.entity.Employer;
 import rut.pan.entity.Roles;
 import rut.pan.entity.UserDto;
@@ -17,7 +24,7 @@ import rut.pan.service2.Service2;
  */
 public class EmployersGridContent extends Grid<Employer> {
 
-    public EmployersGridContent() {
+    public EmployersGridContent(Employer sup) {
         super();
         setWidthFull();
         setSelectionMode(SelectionMode.SINGLE);
@@ -71,7 +78,18 @@ public class EmployersGridContent extends Grid<Employer> {
                     user.setSupervisor(supe);
                 });
 
-        //todo кнопка для просмотра задач подчиненного
+        addColumn(new ComponentRenderer<>(employer -> {
+            HorizontalLayout layout = new HorizontalLayout();
+            Button show = new Button(new Icon(VaadinIcon.ANGLE_DOWN));
+            show.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_SUCCESS);
+            show.addClickListener(e -> {
+                EmployerRequestDialog employerRequestDialog = new EmployerRequestDialog(employer, sup);
+                employerRequestDialog.open();
+            });
+            layout.add(show);
+
+            return layout;
+        }));
     }
 
     private static Renderer<Employer> createAvatarRenderer() {

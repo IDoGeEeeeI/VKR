@@ -12,10 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import rut.pan.entity.Employer;
 import rut.pan.entity.UserDto;
 import rut.pan.security.SecurityService;
-import rut.pan.service.CommentService;
-import rut.pan.service.EmployerService;
-import rut.pan.service.RolesService;
-import rut.pan.service.TaskService;
+import rut.pan.service.*;
 
 
 @Getter
@@ -55,6 +52,9 @@ public class Service2 {
 
     @Autowired
     private CommentService commentService;
+
+    @Autowired
+    private EmployersRequestService employersRequestService;
 
     @Transactional
     public Employer saveOrEditEmployer(Employer savedEmployer) {

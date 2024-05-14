@@ -23,12 +23,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import rut.pan.content.CalendarView;
-import rut.pan.content.EmployersGridContent;
-import rut.pan.content.TaskView;
-import rut.pan.content.UsersGridContent;
+import rut.pan.content.*;
 import rut.pan.content.dialogs.*;
 import rut.pan.entity.Employer;
+import rut.pan.entity.EmployersRequests;
 import rut.pan.service2.Service2;
 
 import java.util.Collection;
@@ -66,6 +64,7 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
 //        Button homeButton = createButtonWithIcon(VaadinIcon.HOME_O, "Главная");
         Button projectsButton = createButtonWithIcon(VaadinIcon.TASKS, "Задачи");
         Button calendarButton = createButtonWithIcon(VaadinIcon.CALENDAR, "Календарь");
+        Button requestButton = createButtonWithIcon(VaadinIcon.QUESTION_CIRCLE_O, "Заявки");
 
 
         HorizontalLayout userDiv = new HorizontalLayout();
@@ -137,7 +136,7 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
 
 
 //        sidebar.add(userDiv, searchField, homeButton, projectsButton, calendarButton);
-        sidebar.add(userDiv, searchField, projectsButton, calendarButton);
+        sidebar.add(userDiv, searchField, projectsButton, calendarButton, requestButton);
         sidebar.addClassName("menu");
 
 
@@ -163,7 +162,7 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
             Button admin = createButtonWithIcon(VaadinIcon.GROUP, "Подчиненные");
             sidebar.add(admin);
 
-            EmployersGridContent grid = new EmployersGridContent();
+            EmployersGridContent grid = new EmployersGridContent(user);
             grid.setWidthFull();
             grid.setHeightFull();
             grid.setItems(Service2.getInstance().getEmployerService().getEmployersBySupervisor(user));
@@ -311,6 +310,31 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
             tasks.add(calendarView);
             tasks.setVisible(true);
             tasks.setEnabled(true);
+        });
+
+        requestButton.addClickListener(e -> {
+            filterLayout.removeAll();
+            tasks.removeAll();
+
+            EmployerRequestAddView employerRequestAddView = new EmployerRequestAddView(user);
+            tasks.add(employerRequestAddView);
+
+            Button createRequest = new Button("Создать заявку");
+            createRequest.setPrefixComponent(VaadinIcon.FILE_ADD.create());
+            createRequest.getStyle().set("left", "8px");
+            createRequest.getStyle().set("top", "4px");
+            createRequest.addClickListener(event -> {
+                EmployersRequests newEmployersRequests = new EmployersRequests();
+                newEmployersRequests.setRequestingEmployer(user);
+
+                ListDataProvider<EmployersRequests> dataProvider = (ListDataProvider<EmployersRequests>) employerRequestAddView.getDataProvider();
+                Collection<EmployersRequests> currentItems = dataProvider.getItems();
+
+                currentItems.add(newEmployersRequests);
+                dataProvider.refreshAll();
+            });
+            filterLayout.add(createRequest);
+
         });
 
 

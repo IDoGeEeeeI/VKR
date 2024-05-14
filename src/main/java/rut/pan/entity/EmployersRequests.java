@@ -35,4 +35,14 @@ public class EmployersRequests {
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date endDate;
+
+    public boolean isEmpty() {
+        return (requestName == null || requestName.isEmpty()) &&
+                (requestDescription == null || requestDescription.isEmpty()) &&
+                requestingEmployer == null &&
+                supervisor == null &&
+                requestStatus == null &&
+                startDate == null &&
+                endDate == null;
+    }
 }
