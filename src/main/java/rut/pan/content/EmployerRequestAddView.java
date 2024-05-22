@@ -67,7 +67,7 @@ public class EmployerRequestAddView extends Grid<EmployersRequests>  {
                 .setHeader("Подчиненный")
                 .setResizable(true);
 
-        this.addColumn(employersRequests -> employersRequests.getRequestingEmployer().getName())
+        this.addColumn(employersRequests -> employer.getSupervisor() != null ? employer.getSupervisor().getName() : "")
                 .setHeader("Руководитель")
                 .setResizable(true);
 
