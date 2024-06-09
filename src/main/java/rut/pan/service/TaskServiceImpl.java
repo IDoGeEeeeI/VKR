@@ -7,13 +7,14 @@ import rut.pan.reposiroty.IPrioritizeRepository;
 import rut.pan.reposiroty.IStatusRepository;
 import rut.pan.reposiroty.ITaskRepository;
 import rut.pan.reposiroty.ITaskTypeRepository;
+import rut.pan.service.IService.ITaskService;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class TaskService {
+public class TaskServiceImpl implements ITaskService {
 
     @Autowired
     private ITaskRepository iTaskRepository;
@@ -27,11 +28,12 @@ public class TaskService {
     @Autowired
     private IPrioritizeRepository iPrioritizeRepository;
 
-
+    @Override
     public List<Task> list() {
         return iTaskRepository.findAll();
     }
 
+    @Override
     public List<Task> getTasksByEmployer(Employer... employers) {
         List<Integer> employerIds = Arrays.stream(employers)
                 .map(Employer::getId)
@@ -39,34 +41,42 @@ public class TaskService {
         return iTaskRepository.findByEmployer_IdIn(employerIds);
     }
 
+    @Override
     public List<Task> getListByEmployer(Employer employer) {
         return iTaskRepository.findByEmployer(employer);
     }
 
+    @Override
     public List<Task> getAllTasksByEmployerId(Integer employerId) {
         return iTaskRepository.getAllTasksByEmployerId(employerId);
     }
 
+    @Override
     public List<Status> getAllStatus() {
         return iStatusRepository.findAll();
     }
 
+    @Override
     public Status getStatusByName(String s) {
         return iStatusRepository.getStatusByStatus(s);
     }
 
+    @Override
     public Status getStatusByTask(Task task) {
         return iStatusRepository.getStatusById(task.getStatus().getId());
     }
 
+    @Override
     public List<Status> getStatus() {
         return iStatusRepository.findAll();
     }
 
+    @Override
     public List<Prioritize> getPrioritize() {
         return iPrioritizeRepository.findAll();
     }
 
+    @Override
     public void saveOrEditTask(Task task) {
         if (task.getId() != null && iTaskRepository.existsById(Long.valueOf(task.getId()))) {
             iTaskRepository.save(task);
@@ -77,6 +87,7 @@ public class TaskService {
         }
     }
 
+    @Override
     public void deleteTask(Task task) {
         if (task.getId() != null && iTaskRepository.existsById(Long.valueOf(task.getId()))) {
             iTaskRepository.delete(task);
@@ -85,14 +96,17 @@ public class TaskService {
         }
     }
 
+    @Override
     public List<TaskType> getTaskTypes() {
         return iTaskTypeRepository.findAll();
     }
 
+    @Override
     public TaskType getTaskTypeByTag(String name) {
         return iTaskTypeRepository.findTaskTypeByType(name);
     }
 
+    @Override
     public Task getTaskById(String id) {
         return iTaskRepository.findById(Long.valueOf(id)).get();
     }

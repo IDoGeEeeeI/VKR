@@ -64,7 +64,7 @@ public class EditTaskCalendar extends Dialog {
             entry.setColor(TaskEnum.getColorByType(e.getValue().getType()));
         });
         taskTypeComboBox.setItemLabelGenerator(TaskType::getType);
-        taskTypeComboBox.setItems(Service2.getInstance().getTaskService().getTaskTypes());
+        taskTypeComboBox.setItems(Service2.getInstance().getTaskServiceImpl().getTaskTypes());
         taskTypeComboBox.setValue(task.getTaskType());
 
 
@@ -72,28 +72,28 @@ public class EditTaskCalendar extends Dialog {
         statusComboBox.setLabel("Статус задачи");
         statusComboBox.setWidthFull();
         statusComboBox.setItemLabelGenerator(Status::getStatus);
-        statusComboBox.setItems(Service2.getInstance().getTaskService().getStatus());
+        statusComboBox.setItems(Service2.getInstance().getTaskServiceImpl().getStatus());
         statusComboBox.setValue(task.getStatus());
 
         ComboBox<Prioritize> prioritizeComboBox = new ComboBox<>();
         prioritizeComboBox.setLabel("Приоритет задачи");
         prioritizeComboBox.setWidthFull();
         prioritizeComboBox.setItemLabelGenerator(Prioritize::getPrioritize);
-        prioritizeComboBox.setItems(Service2.getInstance().getTaskService().getPrioritize());
+        prioritizeComboBox.setItems(Service2.getInstance().getTaskServiceImpl().getPrioritize());
         prioritizeComboBox.setValue(task.getPrioritizer());
 
         ComboBox<Employer> employerComboBox = new ComboBox<>();
         employerComboBox.setLabel("Исполнитель");
         employerComboBox.setWidthFull();
         employerComboBox.setItemLabelGenerator(Employer::getName);
-        employerComboBox.setItems(Service2.getInstance().getEmployerService().list());
+        employerComboBox.setItems(Service2.getInstance().getEmployerServiceImpl().list());
         employerComboBox.setValue(task.getEmployer());
 
         ComboBox<Employer> creatorComboBox = new ComboBox<>();
         creatorComboBox.setLabel("Создатель");
         creatorComboBox.setWidthFull();
         creatorComboBox.setItemLabelGenerator(Employer::getName);
-        creatorComboBox.setItems(Service2.getInstance().getEmployerService().list());
+        creatorComboBox.setItems(Service2.getInstance().getEmployerServiceImpl().list());
         creatorComboBox.setValue(task.getCreator());
         creatorComboBox.setEnabled(false);
 
@@ -161,7 +161,7 @@ public class EditTaskCalendar extends Dialog {
             task.setName(name.getValue());
             task.setTaskType(
                     Service2.getInstance()
-                            .getTaskService()
+                            .getTaskServiceImpl()
                             .getTaskTypeByTag(TaskEnum.getTagByColor(entry.getColor()))
             );
             task.setStatus(statusComboBox.getValue());

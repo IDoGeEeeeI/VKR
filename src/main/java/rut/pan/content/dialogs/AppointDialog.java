@@ -17,7 +17,7 @@ public class AppointDialog extends Dialog {
 
     public AppointDialog(Task task, Consumer<AppointDialog>yes, Consumer<AppointDialog> no) {
         Grid<Employer> grid = new Grid<>(Employer.class, false);
-        grid.setItems(Service2.getInstance().getEmployerService().list());
+        grid.setItems(Service2.getInstance().getEmployerServiceImpl().list());
         grid.setSelectionMode(Grid.SelectionMode.SINGLE);
         grid.addColumn(Employer::getName).setHeader("Исполнитель");
         grid.select(task.getEmployer());//в вебе не отображается, но выбрано, так что Notification не нужен, но оставлю навсякий

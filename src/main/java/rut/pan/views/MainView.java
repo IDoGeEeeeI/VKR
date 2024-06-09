@@ -165,7 +165,7 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
             EmployersGridContent grid = new EmployersGridContent(user);
             grid.setWidthFull();
             grid.setHeightFull();
-            grid.setItems(Service2.getInstance().getEmployerService().getEmployersBySupervisor(user));
+            grid.setItems(Service2.getInstance().getEmployerServiceImpl().getEmployersBySupervisor(user));
 
             Button add = new Button();
             add.setPrefixComponent(VaadinIcon.PLUS.create());
@@ -178,7 +178,7 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
                 EmployerDialog employerDialog = new EmployerDialog(user,
                         (yes, empl) -> {
                             Service2.getInstance().saveOrEditEmployer(empl);
-                            grid.setItems(Service2.getInstance().getEmployerService().getEmployersBySupervisor(user));
+                            grid.setItems(Service2.getInstance().getEmployerServiceImpl().getEmployersBySupervisor(user));
                         });
                 employerDialog.open();
             });
@@ -201,7 +201,7 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
             UsersGridContent grid = new UsersGridContent();
             grid.setWidthFull();
             grid.setHeightFull();
-            grid.setItems(Service2.getInstance().getEmployerService().list());
+            grid.setItems(Service2.getInstance().getEmployerServiceImpl().list());
 
             Button add = new Button();
             add.setPrefixComponent(VaadinIcon.PLUS.create());
@@ -266,7 +266,7 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
             crateTask.addClickListener(event -> {
                 AddTaskDialog addTaskDialog = new AddTaskDialog(
                         (dialog, updatedTask) -> {
-                            Service2.getInstance().getTaskService().saveOrEditTask(updatedTask);
+                            Service2.getInstance().getTaskServiceImpl().saveOrEditTask(updatedTask);
                             taskView.reloadTaskList();
                         });
                 addTaskDialog.open();
@@ -281,11 +281,11 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
             editTask.addClickListener(event -> {
                 EditTaskDialog editTaskDialog = new EditTaskDialog(taskView.getRightTask(),
                         (dialog, updatedTask) -> {
-                            Service2.getInstance().getTaskService().saveOrEditTask(updatedTask);
+                            Service2.getInstance().getTaskServiceImpl().saveOrEditTask(updatedTask);
                             taskView.reloadTaskList();
                         },
                         del -> {
-                            Service2.getInstance().getTaskService().deleteTask(taskView.getRightTask());
+                            Service2.getInstance().getTaskServiceImpl().deleteTask(taskView.getRightTask());
                             taskView.reloadTaskList();
                             taskView.reloadTaskLayoutDefault();
                         });
@@ -350,7 +350,7 @@ class MainView extends VerticalLayout implements BeforeEnterObserver {
     private void getUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
-            user = Service2.getInstance().getEmployerService().getEmployerByUser(
+            user = Service2.getInstance().getEmployerServiceImpl().getEmployerByUser(
                     Service2.getInstance().getSecurityService().getUserByLogin(authentication.getName())//кринж
             );
         }

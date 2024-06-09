@@ -17,7 +17,7 @@ public class EmployerDialog extends Dialog {
 
     public EmployerDialog(Employer supe, BiConsumer<EmployerDialog, Employer> yes, Consumer<EmployerDialog> no) {
         Grid<Employer> grid = new Grid<>(Employer.class, false);
-        grid.setItems(Service2.getInstance().getEmployerService().getEmployersBySupervisorIsNot(supe));
+        grid.setItems(Service2.getInstance().getEmployerServiceImpl().getEmployersBySupervisorIsNot(supe));
         grid.setSelectionMode(Grid.SelectionMode.SINGLE);
         grid.addColumn(Employer::getName).setHeader("Подчиненные");
         setCloseOnOutsideClick(false);

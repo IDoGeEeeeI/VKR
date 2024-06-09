@@ -40,10 +40,10 @@ public class MessageListView extends Div {
             comment.setTask(task);
             comment.setEmployer(employer);
 
-            Service2.getInstance().getCommentService().saveComment(comment);
+            Service2.getInstance().getCommentServiceImpl().saveComment(comment);
         });
 
-        List<Comment> comments = Service2.getInstance().getCommentService().getCommentsByTaskId(task.getId());
+        List<Comment> comments = Service2.getInstance().getCommentServiceImpl().getCommentsByTaskId(task.getId());
         List<MessageListItem> commList = new ArrayList<>();
         for (Comment comment : comments) {
             MessageListItem message = new MessageListItem(

@@ -19,7 +19,7 @@ public class FilterDialog extends Dialog {
     public FilterDialog(BiConsumer<FilterDialog, List<Task>> yes, Consumer<FilterDialog> no) {
         super();
         Grid<Employer> grid = new Grid<>(Employer.class, false);
-        grid.setItems(Service2.getInstance().getEmployerService().list());
+        grid.setItems(Service2.getInstance().getEmployerServiceImpl().list());
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
         grid.addColumn(Employer::getName).setHeader("Исполнитель");
         setCloseOnOutsideClick(false);
@@ -39,7 +39,7 @@ public class FilterDialog extends Dialog {
             FilterDialog.this.close();
             Set<Employer> selectedEmployers = grid.getSelectedItems();
             Employer[] employersArray = selectedEmployers.toArray(new Employer[selectedEmployers.size()]);
-            yes.accept(FilterDialog.this, Service2.getInstance().getTaskService().getTasksByEmployer(employersArray));
+            yes.accept(FilterDialog.this, Service2.getInstance().getTaskServiceImpl().getTasksByEmployer(employersArray));
         });
         horizontalLayout.add(button);
 

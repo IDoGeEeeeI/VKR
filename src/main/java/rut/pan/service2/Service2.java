@@ -42,38 +42,38 @@ public class Service2 {
     private SecurityService securityService;
 
     @Autowired
-    private TaskService taskService;
+    private TaskServiceImpl taskServiceImpl;
 
     @Autowired
-    private EmployerService employerService;
+    private EmployerServiceImpl employerServiceImpl;
 
     @Autowired
-    private RolesService rolesService;
+    private RolesServiceImpl rolesServiceImpl;
 
     @Autowired
-    private CommentService commentService;
+    private CommentServiceImpl commentServiceImpl;
 
     @Autowired
-    private EmployersRequestService employersRequestService;
+    private EmployersRequestServiceImpl employersRequestService;
 
     @Transactional
     public Employer saveOrEditEmployer(Employer savedEmployer) {
         UserDto userDto = savedEmployer.getUser();
         UserDto updatedOrNewUser = securityService.createOrUpdateUser(userDto.getLogin(), userDto.getPassword(), userDto.getRole());
         savedEmployer.setUser(updatedOrNewUser);
-        return employerService.addEmployer(savedEmployer);
+        return employerServiceImpl.addEmployer(savedEmployer);
     }
 
     @Transactional
     public void deleteEmployer(Employer employer) {
-        employerService.remove(employer);
+        employerServiceImpl.remove(employer);
         securityService.deleteUser(employer.getUser());
     }
 
     public Employer getEmployerByAuthenticationUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
-            return Service2.getInstance().getEmployerService().getEmployerByUser(Service2.getInstance().getSecurityService().getUserByLogin(authentication.getName()));
+            return Service2.getInstance().getEmployerServiceImpl().getEmployerByUser(Service2.getInstance().getSecurityService().getUserByLogin(authentication.getName()));
         }
         return null;
     }

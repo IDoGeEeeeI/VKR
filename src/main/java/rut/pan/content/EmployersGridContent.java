@@ -49,7 +49,7 @@ public class EmployersGridContent extends Grid<Employer> {
                 .setResizable(true);
 
         rolesComboBox.setItemLabelGenerator(Roles::getRoleName);
-        rolesComboBox.setItems(Service2.getInstance().getRolesService().list());
+        rolesComboBox.setItems(Service2.getInstance().getRolesServiceImpl().list());
         this.addColumn(employer -> employer.getUser() == null
                         ? "" : employer.getUser().getRole() == null ? "" : employer.getUser().getRole().getRoleName())
                 .setHeader("Должность")

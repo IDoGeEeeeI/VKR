@@ -32,11 +32,11 @@ public class CalendarView extends Div {
 
         calendarContent.setLocale(CalendarLocale.RUSSIAN.getLocale());
 
-        List<Task> taskList = Service2.getInstance().getTaskService().getListByEmployer(employer);
-        List<Employer> employers = Service2.getInstance().getEmployerService().getEmployersBySupervisor(employer);
+        List<Task> taskList = Service2.getInstance().getTaskServiceImpl().getListByEmployer(employer);
+        List<Employer> employers = Service2.getInstance().getEmployerServiceImpl().getEmployersBySupervisor(employer);
         if (!employers.isEmpty()) {
             for (Employer epm : employers) {
-                taskList.addAll(Service2.getInstance().getTaskService().getListByEmployer(epm));
+                taskList.addAll(Service2.getInstance().getTaskServiceImpl().getListByEmployer(epm));
             }
         }
 
@@ -56,11 +56,11 @@ public class CalendarView extends Div {
             Task task = entryTaskMap.get(entry);
             EditTaskCalendar editTaskCalendar = new EditTaskCalendar(entry, task,
                     (dialog, updatedTask) -> {
-                        Service2.getInstance().getTaskService().saveOrEditTask(updatedTask);
+                        Service2.getInstance().getTaskServiceImpl().saveOrEditTask(updatedTask);
                         entryProvider.refreshAll();
                     },
                     del -> {
-                        Service2.getInstance().getTaskService().deleteTask(task);
+                        Service2.getInstance().getTaskServiceImpl().deleteTask(task);
                         entryTaskMap.remove(entry);
                         entryProvider.refreshAll();
 

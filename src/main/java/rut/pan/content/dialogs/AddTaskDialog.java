@@ -49,32 +49,32 @@ public class AddTaskDialog extends Dialog {
         taskTypeComboBox.setLabel("Тип задачи");
         taskTypeComboBox.setWidthFull();
         taskTypeComboBox.setItemLabelGenerator(TaskType::getType);
-        taskTypeComboBox.setItems(Service2.getInstance().getTaskService().getTaskTypes());
+        taskTypeComboBox.setItems(Service2.getInstance().getTaskServiceImpl().getTaskTypes());
 
 
         ComboBox<Status> statusComboBox = new ComboBox<>();
         statusComboBox.setLabel("Статус задачи");
         statusComboBox.setWidthFull();
         statusComboBox.setItemLabelGenerator(Status::getStatus);
-        statusComboBox.setItems(Service2.getInstance().getTaskService().getStatus());
+        statusComboBox.setItems(Service2.getInstance().getTaskServiceImpl().getStatus());
 
         ComboBox<Prioritize> prioritizeComboBox = new ComboBox<>();
         prioritizeComboBox.setLabel("Приоритет задачи");
         prioritizeComboBox.setWidthFull();
         prioritizeComboBox.setItemLabelGenerator(Prioritize::getPrioritize);
-        prioritizeComboBox.setItems(Service2.getInstance().getTaskService().getPrioritize());
+        prioritizeComboBox.setItems(Service2.getInstance().getTaskServiceImpl().getPrioritize());
 
         ComboBox<Employer> employerComboBox = new ComboBox<>();
         employerComboBox.setLabel("Исполнитель");
         employerComboBox.setWidthFull();
         employerComboBox.setItemLabelGenerator(Employer::getName);
-        employerComboBox.setItems(Service2.getInstance().getEmployerService().list());
+        employerComboBox.setItems(Service2.getInstance().getEmployerServiceImpl().list());
 
         ComboBox<Employer> creatorComboBox = new ComboBox<>();
         creatorComboBox.setLabel("Создатель");
         creatorComboBox.setWidthFull();
         creatorComboBox.setItemLabelGenerator(Employer::getName);
-        creatorComboBox.setItems(Service2.getInstance().getEmployerService().list());
+        creatorComboBox.setItems(Service2.getInstance().getEmployerServiceImpl().list());
 
         TextArea description = new TextArea();
         description.setLabel("Описание");

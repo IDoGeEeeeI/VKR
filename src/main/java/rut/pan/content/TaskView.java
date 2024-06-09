@@ -51,7 +51,7 @@ public class TaskView extends SplitLayout {
         addToSecondary(rightLayout);
         createButtons();
         Component component = leftLayout.getChildren().findFirst().get();
-        createTaskRightView(Service2.getInstance().getTaskService().getTaskById(component.getElement().getProperty("task-id")));
+        createTaskRightView(Service2.getInstance().getTaskServiceImpl().getTaskById(component.getElement().getProperty("task-id")));
         setHeight("780px");
         setSplitterPosition(15);
 
@@ -165,12 +165,12 @@ public class TaskView extends SplitLayout {
         Button close = new Button("Закрыть запрос");
         Button reopen = new Button("Переоткрыть запрос");
 
-        List<Status> allStatus = Service2.getInstance().getTaskService().getAllStatus();
+        List<Status> allStatus = Service2.getInstance().getTaskServiceImpl().getAllStatus();
 
         appoint.addClickListener(e -> {
             AppointDialog appointDialog = new AppointDialog(task,
             yes -> {
-                Service2.getInstance().getTaskService().saveOrEditTask(task);
+                Service2.getInstance().getTaskServiceImpl().saveOrEditTask(task);
                 reloadTaskLayout(task);
             });
             appointDialog.open();
@@ -179,7 +179,7 @@ public class TaskView extends SplitLayout {
         startWork.addClickListener(e -> {
             task.setStatus(allStatus.get(1)); //кринж
             task.setStartDate(Date.from(Instant.now()));
-            Service2.getInstance().getTaskService().saveOrEditTask(task);
+            Service2.getInstance().getTaskServiceImpl().saveOrEditTask(task);
 
             reloadButtons(buttonsLayout, task);
             reloadTaskLayout(task);
@@ -187,7 +187,7 @@ public class TaskView extends SplitLayout {
 
         stopWork.addClickListener(e -> {
             task.setStatus(allStatus.get(0));
-            Service2.getInstance().getTaskService().saveOrEditTask(task);
+            Service2.getInstance().getTaskServiceImpl().saveOrEditTask(task);
 
             reloadButtons(buttonsLayout, task);
             reloadTaskLayout(task);
@@ -195,7 +195,7 @@ public class TaskView extends SplitLayout {
 
         agreed.addClickListener(e -> {
             task.setStatus(allStatus.get(2));
-            Service2.getInstance().getTaskService().saveOrEditTask(task);
+            Service2.getInstance().getTaskServiceImpl().saveOrEditTask(task);
 
             reloadButtons(buttonsLayout, task);
             reloadTaskLayout(task);
@@ -203,7 +203,7 @@ public class TaskView extends SplitLayout {
 
         close.addClickListener(e -> {
             task.setStatus(allStatus.get(4));
-            Service2.getInstance().getTaskService().saveOrEditTask(task);
+            Service2.getInstance().getTaskServiceImpl().saveOrEditTask(task);
 
             reloadButtons(buttonsLayout, task);
             reloadTaskLayout(task);
@@ -211,7 +211,7 @@ public class TaskView extends SplitLayout {
 
         reopen.addClickListener(e -> {
             task.setStatus(allStatus.get(3));
-            Service2.getInstance().getTaskService().saveOrEditTask(task);
+            Service2.getInstance().getTaskServiceImpl().saveOrEditTask(task);
 
             reloadButtons(buttonsLayout, task);
             reloadTaskLayout(task);
@@ -238,7 +238,7 @@ public class TaskView extends SplitLayout {
     }
 
     private void createButtons() {
-        for (Task task : Service2.getInstance().getTaskService().list()) {
+        for (Task task : Service2.getInstance().getTaskServiceImpl().list()) {
             Div taskDiv = createDivTask(task);
             taskDiv.addClickListener(e -> {
                 buttonClickHandler(task);
@@ -260,7 +260,7 @@ public class TaskView extends SplitLayout {
 
     public void reloadTaskList() {
         leftLayout.removeAll();
-        for (Task task : Service2.getInstance().getTaskService().list()) {
+        for (Task task : Service2.getInstance().getTaskServiceImpl().list()) {
             Div taskDiv = createDivTask(task);
             taskDiv.addClickListener(e -> {
                 buttonClickHandler(task);
@@ -275,7 +275,7 @@ public class TaskView extends SplitLayout {
 
     public void reloadTaskLayoutDefault() {
         Component component = leftLayout.getChildren().findFirst().get();
-        createTaskRightView(Service2.getInstance().getTaskService().getTaskById(component.getElement().getProperty("task-id")));
+        createTaskRightView(Service2.getInstance().getTaskServiceImpl().getTaskById(component.getElement().getProperty("task-id")));
     }
 
     private void buttonClickHandler(Task task) {

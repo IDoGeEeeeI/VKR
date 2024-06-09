@@ -176,7 +176,7 @@ public class UsersGridContent extends Grid<Employer> {
         binder.bind(nameField, Employer::getName, Employer::setName);
 
         rolesComboBox.setItemLabelGenerator(Roles::getRoleName);
-        rolesComboBox.setItems(Service2.getInstance().getRolesService().list());
+        rolesComboBox.setItems(Service2.getInstance().getRolesServiceImpl().list());
         this.addColumn(employer -> employer.getUser() == null
                         ? "" : employer.getUser().getRole() == null ? "" : employer.getUser().getRole().getRoleName())
                 .setHeader("Должность")
@@ -211,7 +211,7 @@ public class UsersGridContent extends Grid<Employer> {
     }
 
     private int collEmp() {
-        return Service2.getInstance().getEmployerService().list().size();
+        return Service2.getInstance().getEmployerServiceImpl().list().size();
     }
 
     private static Renderer<Employer> createAvatarRenderer() {
