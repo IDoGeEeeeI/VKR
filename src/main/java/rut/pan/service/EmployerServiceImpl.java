@@ -2,6 +2,7 @@ package rut.pan.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import rut.pan.entity.Employer;
 import rut.pan.entity.UserDto;
@@ -47,7 +48,7 @@ public class EmployerServiceImpl implements IEmployerService {
     }
 
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     public Employer addEmployer(final Employer employer) {
         return iEmployerRepository.save(employer);
     }
